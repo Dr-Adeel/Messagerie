@@ -1,5 +1,6 @@
 package com.eilco.messagerie.repositories;
 
+import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,4 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByFirstNameContainingIgnoreCase(String firstName);
 
     List<User> findByUsernameContainingIgnoreCase(String username);
+
+    List<User> findAllByGroup(Group group);
+
 }
