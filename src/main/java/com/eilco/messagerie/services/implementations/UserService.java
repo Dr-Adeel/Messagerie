@@ -117,4 +117,41 @@ public class UserService implements IUserService {
     }
 
 
+    //  DELETE
+    @Override
+    public void delete(Long id) {
+
+        authorizationService.checkPermission("USER_DELETE");
+
+        if (!userRepository.existsById(id)) {
+            throw new RuntimeException("Utilisateur introuvable");
+        }
+
+        userRepository.deleteById(id);
+    }
+
+    //  RECHERCHE PAR USERNAME
+    @Override
+    public List<UserResponse> searchByUsername(String username) {
+
+        authorizationService.checkPermission("USER_SEARCH");
+
+        return userRepository.findByUsernameContainingIgnoreCase(username)
+                .stream()
+                .map(userMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    // RECHERCHE PAR FIRSTNAME
+    @Override
+    public List<UserResponse> searchByFirstName(String firstname) {
+
+        authorizationService.checkPermission("USER_SEARCH");
+
+        return userRepository.findByFirstNameContainingIgnoreCase(firstname)
+                .stream()
+                .map(userMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
 }

@@ -13,4 +13,10 @@ public interface IUserService {
 
     UserResponse update(Long id, UserRequest request);
 
+    void delete(Long id);
+
+    List<UserResponse> searchByUsername(String username);
+
+    List<UserResponse> searchByFirstName(String firstname);
+
 }
