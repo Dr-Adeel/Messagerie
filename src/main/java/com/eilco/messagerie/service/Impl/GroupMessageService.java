@@ -68,16 +68,15 @@ public class GroupMessageService implements IGroupMessageService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-
+        System.out.println("111111111");
         // Vérifier que l'utilisateur est membre du groupe
         boolean isMember = group.getMembers()
                 .stream()
                 .anyMatch(member -> member.getId().equals(userId));
-
+        System.out.println("22222222");
         if (!isMember) {
             throw new IllegalStateException("Accès refusé : Vous ne faites pas partie de ce groupe");
         }
-
         // Retourner les messages du groupe triés par date croissante
         return messageRepository.findByReceiverGroupIdOrderByTimestampAsc(groupId);
     }
