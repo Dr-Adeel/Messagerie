@@ -1,6 +1,7 @@
 package com.eilco.messagerie.controller;
 
 
+import com.eilco.messagerie.models.request.MessageRequest;
 import com.eilco.messagerie.service.Impl.GroupMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,28 +12,23 @@ import org.springframework.web.bind.annotation.*;
  */
 
 @RestController
-@RequestMapping("/api/group-messages")
+@RequestMapping("/group-messages")
 public class GroupMessageController {
 
     @Autowired
     private GroupMessageService groupMessageService;
 
-    /**
-     * ENVOYER MESSAGE AU GROUPE
-     */
+
     @PostMapping("/{groupId}/send")
-    public ResponseEntity<?> sendMessage(@PathVariable Long groupId,
-                                         @RequestParam Long senderId,
-                                         @RequestParam String content) {
+    public ResponseEntity<?> sendMessageGroup(@PathVariable Long groupId, @RequestBody MessageRequest messageRequest) {
+
 
         return ResponseEntity.ok(
-                groupMessageService.sendMessage(senderId, groupId, content)
+                groupMessageService.sendMessageGroup(messageRequest.getSenderId(), groupId, messageRequest.getContent())
         );
     }
 
-    /**
-     * RÉCUPÉRER L'HISTORIQUE
-     */
+
     @GetMapping("/{groupId}/history")
     public ResponseEntity<?> getGroupMessages(@PathVariable Long groupId,
                                               @RequestParam Long userId) {

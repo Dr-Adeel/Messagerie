@@ -6,6 +6,7 @@ import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.Message;
 import com.eilco.messagerie.repositories.entities.User;
+import com.eilco.messagerie.service.IGroupMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ import java.util.List;
  */
 
 @Service
-public class GroupMessageService {
+public class GroupMessageService implements IGroupMessageService {
 
     @Autowired
     private MessageRepository messageRepository;
@@ -31,7 +32,8 @@ public class GroupMessageService {
     /**
      * ENVOYER UN MESSAGE DANS UN GROUPE
      */
-    public Message sendMessage(Long senderId, Long groupId, String content) {
+    @Override
+    public Message sendMessageGroup(Long senderId, Long groupId, String content) {
 
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
