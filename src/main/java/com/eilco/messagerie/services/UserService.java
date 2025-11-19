@@ -22,7 +22,7 @@ public class UserService implements IUserService {
     public UserResponse saveUser(UserRequest request) {
         User entity = userMapper.toEntity(request);
 
-        entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+        entity.setPassword(passwordEncoder.encode(request.getPassword()));
 
         return userMapper.toResponse(userRepository.save(entity));
     }
