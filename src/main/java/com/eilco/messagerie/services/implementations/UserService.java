@@ -1,9 +1,80 @@
-package com.eilco.messagerie.services.implementations;
+package com.eilco.messagerie.services;
 
-import com.eilco.messagerie.services.interfaces.IUserService;
+import com.eilco.messagerie.mappers.UserMapper;
+import com.eilco.messagerie.models.request.UserRequest;
+import com.eilco.messagerie.models.response.UserResponse;
+import com.eilco.messagerie.repositories.UserRepository;
+import com.eilco.messagerie.repositories.entities.Group;
+import com.eilco.messagerie.repositories.entities.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
-public class UserService implements IUserService {
+public class UserService {
+
+    private final UserRepository userRepository;
+    private final GroupService groupService;
+    private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthorizationService authorizationService; // Équipe 2
+
+    public UserService(
+            UserRepository userRepository,
+            GroupService groupService,
+            UserMapper userMapper,
+            PasswordEncoder passwordEncoder,
+            AuthorizationService authorizationService
+    ) {
+        this.userRepository = userRepository;
+        this.groupService = groupService;
+        this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.authorizationService = authorizationService;
+    }
+
+
+    // CREATE USER
+    public UserResponse create(UserRequest request) {
+
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new RuntimeException("Le nom d'utilisateur existe déjà.");
+        }
+
+        User user = userMapper.toEntity(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        //  Cas où l’utilisateur doit être ajouté à un groupe
+        if (request.getGroupId() != null) {
+
+            Group group = groupService.getById(request.getGroupId());
+
+            //  On récupère l'utilisateur connecté (via Security)
+            User currentUser = authorizationService.getCurrentUser();
+
+            //  Vérification de rôle admin dans le groupe
+            if (!groupService.isAdminOfGroup(currentUser, group)) {
+                throw new RuntimeException("Vous n'êtes pas autorisé à ajouter un membre à ce groupe.");
+            }
+
+            user.setGroup(group);
+        }
+
+        return userMapper.toResponse(userRepository.save(user));
+    }
+
+    //  READ (By ID)
+    public UserResponse getById(Long id) {
+
+        authorizationService.checkPermission("USER_READ");
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        return userMapper.toResponse(user);
+    }
+
 
 }
