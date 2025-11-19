@@ -20,30 +20,35 @@ public class GroupService implements IGroupService {
     private GroupRepository groupRepo;
 
     @Autowired
-    private UserRepository userRepo;
+    private UserRepository userRepository;
+    @Autowired
+    private GroupMapper groupMapper;
+    @Autowired
+    private GroupRepository groupRepository;
 
-        public GroupResponse createGroup(GroupRequest groupRequest) {
-            Long creatorId = groupRequest.getCreatorId();
+    @Override
+    public GroupResponse createGroup(GroupRequest groupRequest) {
+        Long creatorId = groupRequest.getCreatorId();
 
-            User dbCreator = userRepository.findById(creatorId)
-                    .orElseThrow(() -> new IllegalArgumentException("Creator user not found"));
+        User dbCreator = userRepository.findById(creatorId)
+                .orElseThrow(() -> new IllegalArgumentException("Creator user not found"));
 
-            if (dbCreator.getGroup() != null) {
-                throw new IllegalStateException("User is already assigned to a group");
-            }
-
-            GroupResponse savedGroup = groupMapper.toResponse(
-                    groupRepository.save(
-                            groupMapper.toEntity(groupRequest)
-                    )
-            );
-
-            // Assign the new group to the creator
-            dbCreator.setGroup(groupMapper.toEntity(groupRequest));
-            userRepository.save(dbCreator);
-
-            return savedGroup;
+        if (dbCreator.getGroup() != null) {
+            throw new IllegalStateException("User is already assigned to a group");
         }
+
+        GroupResponse savedGroup = groupMapper.toResponse(
+                groupRepository.save(
+                        groupMapper.toEntity(groupRequest)
+                )
+        );
+
+        // Assign the new group to the creator
+        dbCreator.setGroup(groupMapper.toEntity(groupRequest));
+        userRepository.save(dbCreator);
+
+        return savedGroup;
+    }
 
 
     public void deleteGroup(Long groupId){
@@ -71,10 +76,10 @@ public class GroupService implements IGroupService {
         Group group = groupRepo.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Group not found"));
 
-        User requester = userRepo.findById(requesterId)
+        User requester = userRepository.findById(requesterId)
                 .orElseThrow(() -> new RuntimeException("Requester not found"));
 
-        User newMember = userRepo.findById(userId)
+        User newMember = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // 1️ Vérifier que le requester est bien le créateur du groupe
@@ -90,7 +95,7 @@ public class GroupService implements IGroupService {
         // 3️ Ajouter l'utilisateur au groupe
         newMember.setGroup(group);
 
-        userRepo.save(newMember);
+        userRepository.save(newMember);
     }
     @Override
     public void removeMember(Long groupId, Long userId, Long requesterId) {
@@ -98,10 +103,10 @@ public class GroupService implements IGroupService {
         Group group = groupRepo.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Group not found"));
 
-        User requester = userRepo.findById(requesterId)
+        User requester = userRepository.findById(requesterId)
                 .orElseThrow(() -> new RuntimeException("Requester not found"));
 
-        User member = userRepo.findById(userId)
+        User member = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // 1. Vérifier que le requester est le créateur du groupe
@@ -122,7 +127,7 @@ public class GroupService implements IGroupService {
         // 4. Retirer l’utilisateur du groupe
         member.setGroup(null);
 
-        userRepo.save(member);  // persister la suppression du lien
+        userRepository.save(member);  // persister la suppression du lien
     }
 
 }
