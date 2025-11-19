@@ -12,7 +12,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-// Do NOT import your entity or repository since names conflict
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {

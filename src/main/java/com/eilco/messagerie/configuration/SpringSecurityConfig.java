@@ -10,18 +10,14 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-
+import org.springframework.beans.factory.annotation.Value;
 import javax.crypto.spec.SecretKeySpec;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 
@@ -33,8 +29,11 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 
 public class SpringSecurityConfig {
 
+    @Value("${jwt.secret}")
+    private String jwtKey ;
 
-    private String jwtKey = "toupdate.....";
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -50,36 +49,11 @@ public class SpringSecurityConfig {
         return new NimbusJwtEncoder(new ImmutableSecret<>(this.jwtKey.getBytes()));
     }
 
+
     @Bean
     public JwtDecoder jwtDecoder() {
         SecretKeySpec secretKey = new SecretKeySpec(this.jwtKey.getBytes(), 0, this.jwtKey.getBytes().length, "RSA");
         return NimbusJwtDecoder.withSecretKey(secretKey).macAlgorithm(MacAlgorithm.HS256).build();
-    }
-
-    @Bean
-    public UserDetailsService users() {
-        UserDetails user = User.builder().username("user").password(passwordEncoder().encode("password")).roles("USER")
-                .build();
-        return new InMemoryUserDetailsManager(user);
-    }
-
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-
-    /*
-    @Autowired
-    private CustomUserDetailsService customUserDetailsService;
-
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        return http.authorizeHttpRequests(auth -> {
-            auth.requestMatchers("/admin") ;
-            auth.requestMatchers("/user");
-            auth.anyRequest().authenticated();
-        }).formLogin(Customizer.withDefaults()).build();
     }
 
     @Bean
@@ -93,7 +67,19 @@ public class SpringSecurityConfig {
         authenticationManagerBuilder.userDetailsService(customUserDetailsService).passwordEncoder(bCryptPasswordEncoder);
         return authenticationManagerBuilder.build();
     }
-*/
+
+/*
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        return http.authorizeHttpRequests(auth -> {
+            auth.requestMatchers("/admin") ;
+            auth.requestMatchers("/user");
+            auth.anyRequest().authenticated();
+        }).formLogin(Customizer.withDefaults()).build();
+    }
+    */
+
+
 
 
 }
