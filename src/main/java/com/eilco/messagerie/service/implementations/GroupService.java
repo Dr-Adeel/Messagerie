@@ -1,7 +1,41 @@
 package com.eilco.messagerie.service.implementations;
 
 
+import com.eilco.messagerie.mappers.GroupMapper;
+import com.eilco.messagerie.models.request.GroupRequest;
+import com.eilco.messagerie.models.response.GroupResponse;
+import com.eilco.messagerie.repositories.GroupRepository;
+import com.eilco.messagerie.repositories.entities.Group;
+import com.eilco.messagerie.repositories.entities.User;
 
-public class GroupService {}
+public class GroupService {
+    private UserRepository userRepository;
+    private GroupRepository groupRepository;
+    private GroupMapper groupMapper;
+
+
+    public GroupResponse createGroup(GroupRequest groupRequest) {
+        Long creatorId = groupRequest.getCreatorId();
+
+        User dbCreator = userRepository.findById(creatorId)
+                .orElseThrow(() -> new IllegalArgumentException("Creator user not found"));
+
+        if (dbCreator.getGroup() != null) {
+            throw new IllegalStateException("User is already assigned to a group");
+        }
+
+        GroupResponse savedGroup = groupMapper.toResponse(
+                groupRepository.save(
+                        groupMapper.toEntity(groupRequest)
+                )
+        );
+
+        // Assign the new group to the creator
+        dbCreator.setGroup(groupMapper.toEntity(groupRequest));
+        userRepository.save(dbCreator);
+
+        return savedGroup;
+    }
+}
 
 
