@@ -6,6 +6,7 @@ import com.eilco.messagerie.models.response.UserResponse;
 import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.User;
+import com.eilco.messagerie.services.interfaces.IUserService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,13 +14,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserService implements IUserService {
 
     private final UserRepository userRepository;
     private final GroupService groupService;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthorizationService authorizationService; // Équipe 2
+
 
     public UserService(
             UserRepository userRepository,
@@ -37,6 +39,7 @@ public class UserService {
 
 
     // CREATE USER
+    @Override
     public UserResponse create(UserRequest request) {
 
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -64,7 +67,7 @@ public class UserService {
 
         return userMapper.toResponse(userRepository.save(user));
     }
-
+    @Override
     //  READ (By ID)
     public UserResponse getById(Long id) {
 
@@ -74,6 +77,43 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
         return userMapper.toResponse(user);
+    }
+
+    //  READ (ALL)
+    @Override
+    public List<UserResponse> getAll() {
+
+        authorizationService.checkPermission("USER_READ");
+
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    //  UPDATE
+    @Override
+    public UserResponse update(Long id, UserRequest request) {
+
+        authorizationService.checkPermission("USER_UPDATE");
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+
+        user.setUsername(request.getUsername());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        if (request.getGroupId() != null) {
+            Group group = groupService.getById(request.getGroupId());
+            user.setGroup(group);
+        }
+
+        return userMapper.toResponse(userRepository.save(user));
     }
 
 
