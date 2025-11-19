@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 /**
  * NotificationService - Business logic layer for notification management
+ * implementing all the functions
  */
 @Service
 @RequiredArgsConstructor
