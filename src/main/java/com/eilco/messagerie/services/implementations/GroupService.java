@@ -1,10 +1,11 @@
-package com.eilco.messagerie.service.implementations;
+package com.eilco.messagerie.services.implementations;
 
 
 import com.eilco.messagerie.mappers.GroupMapper;
 import com.eilco.messagerie.models.request.GroupRequest;
 import com.eilco.messagerie.models.response.GroupResponse;
 import com.eilco.messagerie.repositories.GroupRepository;
+import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.User;
 

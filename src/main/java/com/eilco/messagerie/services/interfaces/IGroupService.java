@@ -1,4 +1,4 @@
-package com.eilco.messagerie.service.interfaces;
+package com.eilco.messagerie.services.interfaces;
 
 import com.eilco.messagerie.models.request.GroupRequest;
 import com.eilco.messagerie.repositories.entities.Group;
