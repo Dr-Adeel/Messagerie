@@ -1,10 +1,11 @@
 package com.eilco.messagerie.mappers;
 
 
+import org.springframework.stereotype.Component;
+
 import com.eilco.messagerie.models.request.UserRequest;
 import com.eilco.messagerie.models.response.UserResponse;
 import com.eilco.messagerie.repositories.entities.User;
-import org.springframework.stereotype.Component;
 
 @Component
 public class UserMapper {
@@ -32,6 +33,7 @@ public class UserMapper {
         }
 
         return response;
+        
     }
 
 
