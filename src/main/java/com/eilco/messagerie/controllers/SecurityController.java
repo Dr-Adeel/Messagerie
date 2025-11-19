@@ -5,6 +5,7 @@ import com.eilco.messagerie.models.response.UserResponse;
 import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.services.IUserService;
 import com.eilco.messagerie.services.JWTService;
+import com.eilco.messagerie.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -20,14 +21,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 public class SecurityController {
 
-    private JWTService jwtService;
+    final private JWTService jwtService;
 
-    private  IUserService userService;
+    final private  IUserService userService;
 
-    public SecurityController(JWTService jwtService, IUserService userService) {
-        this.jwtService = jwtService;
-        this.userService = userService;
-    }
+
 
     @PostMapping("/login")
     public String getToken(Authentication authentication) {

@@ -39,7 +39,25 @@ public class SpringSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/login", "/register").permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> auth.requestMatchers(
+                        "/api/**",
+                        "/oauth2/**",
+                        "/oauth2/google",
+                        "/auth/**",
+                        "/auth/login/submit",
+                        "/swagger-ui/**",
+                        "/api-docs",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs.yaml",
+                        "/swagger-resources/**",
+                        "/swagger-resources/configuration/ui",
+                        "/swagger-resources/configuration/security",
+                        "/swagger-ui.html/**",
+                        "/register/user",
+                        "/static/**",
+                        "/login", "/register"
+                ).permitAll().anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
                 .httpBasic(Customizer.withDefaults()).build();
     }
