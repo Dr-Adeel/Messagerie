@@ -6,4 +6,6 @@ import com.eilco.messagerie.repositories.entities.Message;
 
 public interface MessageRepository extends JpaRepository<Message, Long>  {
 
+
 }
+

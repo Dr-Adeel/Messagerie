@@ -1,11 +1,15 @@
 package com.eilco.messagerie.models.request;
 
+import com.eilco.messagerie.repositories.entities.Group;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Data
 public class GroupRequest {
@@ -17,4 +21,18 @@ public class GroupRequest {
     @NotNull(message = "L'ID du créateur est requis.")
     private Long creatorId;
 
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Data
+    public static class NotificationRequest {
+        private Long messageId;
+        private Group.NotificationType type;
+        private Long senderId;
+        private Long recipientId;
+        private Long groupId;
+        private LocalDateTime sentAt;
+        private Boolean status;
+
+    }
 }

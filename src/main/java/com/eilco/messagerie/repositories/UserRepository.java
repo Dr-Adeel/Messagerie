@@ -6,4 +6,5 @@ import com.eilco.messagerie.repositories.entities.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
+
 }

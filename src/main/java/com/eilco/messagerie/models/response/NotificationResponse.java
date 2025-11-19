@@ -3,7 +3,6 @@ package com.eilco.messagerie.models.response;
 import com.eilco.messagerie.repositories.entities.NotificationType;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Data

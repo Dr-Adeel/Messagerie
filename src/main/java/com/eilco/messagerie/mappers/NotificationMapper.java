@@ -45,5 +45,8 @@ public class NotificationMapper {
                 .sentAt(notification.getSentAt())
                 .status(notification.getStatus())
                 .build();
-    }
+
 }
+}
+
+
