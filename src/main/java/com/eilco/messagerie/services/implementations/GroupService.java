@@ -69,6 +69,21 @@ public class GroupService implements IGroupService {
     }
 
 
+
+    @Override
+    public boolean isAdminOfGroup(User user, Group group) {
+        if (user == null || group == null) {
+            return false;
+        }
+        // Ajoutez votre logique d'autorisation ici. Exemple :
+        return group.getCreator() != null && group.getCreator().getId().equals(user.getId());
+    }
+
+    @Override
+    public Group getById(Long id) {
+        return groupRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Group not found with ID: " + id));
+    }
     @Override
     public void addMember(Long groupId, Long userId, Long requesterId) {
 
