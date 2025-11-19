@@ -1,5 +1,6 @@
 package com.eilco.messagerie.repositories.entities;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,9 +29,10 @@ public class User {
 
     // Relation ManyToOne: Un utilisateur appartient à UN SEUL groupe.
     // Cette colonne 'group_id' sera créée dans la table 'app_user'.
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id")
-    private Group group;
+//    @JsonManagedReference
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "group_id")
+//    private Group group;
 
 }
 

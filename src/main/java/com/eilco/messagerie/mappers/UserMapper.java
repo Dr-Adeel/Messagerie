@@ -27,10 +27,10 @@ public class UserMapper {
         response.setLastName(user.getLastName());
 
         // Mapping de la relation de groupe
-        if (user.getGroup() != null) {
-            response.setGroupId(user.getGroup().getId());
-            response.setGroupName(user.getGroup().getName());
-        }
+//        if (user.getGroup() != null) {
+//            response.setGroupId(user.getGroup().getId());
+//            response.setGroupName(user.getGroup().getName());
+//        }
 
         return response;
     }

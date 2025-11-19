@@ -30,10 +30,10 @@ public class GroupMapper {
         response.setId(group.getId());
         response.setName(group.getName());
 
-        if (group.getCreator() != null) {
-            response.setCreatorId(group.getCreator().getId());
-            response.setCreatorUsername(group.getCreator().getUsername());
-        }
+//        if (group.getCreator() != null) {
+//            response.setCreatorId(group.getCreator().getId());
+//            response.setCreatorUsername(group.getCreator().getUsername());
+//        }
 
 
         return response;

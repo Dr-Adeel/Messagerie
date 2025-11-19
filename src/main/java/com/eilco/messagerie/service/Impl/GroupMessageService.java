@@ -13,10 +13,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * @author akdim
- */
-
 @Service
 public class GroupMessageService implements IGroupMessageService {
 
@@ -41,17 +37,22 @@ public class GroupMessageService implements IGroupMessageService {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Groupe introuvable"));
 
-        // Vérifier que l'utilisateur appartient bien au groupe
-        if (sender.getGroup() == null || !sender.getGroup().getId().equals(groupId)) {
+        // Vérifier que l'utilisateur est membre du groupe
+        boolean isMember = group.getMembers()
+                .stream()
+                .anyMatch(member -> member.getId().equals(senderId));
+
+        if (!isMember) {
             throw new IllegalStateException("Vous n’êtes pas membre de ce groupe");
         }
 
+        // Créer et sauvegarder le message
         Message message = new Message();
         message.setContent(content);
         message.setSender(sender);
         message.setReceiverGroup(group);
-        message.setTimestamp(LocalDateTime.now());
         message.setReceiverUser(null); // car message de groupe
+        message.setTimestamp(LocalDateTime.now());
 
         return messageRepository.save(message);
     }
@@ -59,16 +60,25 @@ public class GroupMessageService implements IGroupMessageService {
     /**
      * RÉCUPÉRER L'HISTORIQUE DES MESSAGES DU GROUPE
      */
+    @Override
     public List<Message> getGroupMessages(Long groupId, Long userId) {
+
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Groupe introuvable"));
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        // Vérification d'appartenance au groupe
-        if (user.getGroup() == null || !user.getGroup().getId().equals(groupId)) {
+        // Vérifier que l'utilisateur est membre du groupe
+        boolean isMember = group.getMembers()
+                .stream()
+                .anyMatch(member -> member.getId().equals(userId));
+
+        if (!isMember) {
             throw new IllegalStateException("Accès refusé : Vous ne faites pas partie de ce groupe");
         }
 
+        // Retourner les messages du groupe triés par date croissante
         return messageRepository.findByReceiverGroupIdOrderByTimestampAsc(groupId);
     }
 }
