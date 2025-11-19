@@ -63,8 +63,6 @@
 			<artifactId>spring-boot-starter-validation</artifactId>
 		</dependency>
 
-
-
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -78,6 +76,11 @@
 			<scope>test</scope>
 		</dependency>
 
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.7.0</version>
+        </dependency>
 
 	</dependencies>
 
