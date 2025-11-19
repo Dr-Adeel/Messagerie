@@ -36,4 +36,38 @@ public class Message {
     @JoinColumn(name = "receiver_group_id")
     private Group receiverGroup;
 
+    @Entity
+    @Table(name = "notifications")
+    public static class Notification {
+
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private Long id;
+
+        @Column(name = "message_id", nullable = false)
+        private Long messageId;
+
+        @Enumerated(EnumType.STRING)
+        @Column(name = "type", nullable = false)
+        private Group.NotificationType type;
+
+        @Column(name = "sender_id", nullable = false)
+        private Long senderId;
+
+        @Column(name = "recipient_id", nullable = false)
+        private Long recipientId;
+
+
+        @Column(name = "grpid")
+        private Long groupId;
+
+        @Column(name = "sentAt ")
+        private LocalDateTime sentAt ;
+
+        @Column(name = "status", length = 20)
+        private Boolean status;
+
+
+
+    }
 }

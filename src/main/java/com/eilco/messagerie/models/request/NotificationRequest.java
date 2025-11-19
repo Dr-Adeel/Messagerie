@@ -1,7 +1,6 @@
 package com.eilco.messagerie.models.request;
 
 
-
 import com.eilco.messagerie.repositories.entities.NotificationType;
 import lombok.*;
 

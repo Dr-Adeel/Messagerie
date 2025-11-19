@@ -5,9 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.Set;
-import java.util.HashSet;
-
 @Entity
 @Table(name = "app_group")
 @Data
@@ -27,4 +24,10 @@ public class Group {
     private User creator;
 
 
+    public enum NotificationType {
+        PRIVATE_MESSAGE,
+        GROUP_MESSAGE,
+        MENTION,
+        GROUP_INVITE
+    }
 }
