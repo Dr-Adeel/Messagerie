@@ -40,7 +40,7 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/search")
+    @GetMapping(value = "/search", params = "name")
     public ResponseEntity<List<UserResponse>> searchByFirstName(@RequestParam String name) {
         if (name == null || name.trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Search name cannot be empty");
@@ -48,7 +48,7 @@ public class UserController {
         return ResponseEntity.ok(userService.searchByFirstName(name));
     }
 
-    @GetMapping("/search")
+    @GetMapping(value = "/search", params = "username")
     public ResponseEntity<List<UserResponse>> searchByUsername(@RequestParam String username) {
         if (username == null || username.trim().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Search name cannot be empty");
