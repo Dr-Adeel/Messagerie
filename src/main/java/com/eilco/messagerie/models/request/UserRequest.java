@@ -2,12 +2,16 @@ package com.eilco.messagerie.models.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import lombok.Builder;
+import lombok.NoArgsConstructor;
 
-@Builder
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserRequest {
 
     @NotBlank(message = "Le nom d'utilisateur est requis.")
