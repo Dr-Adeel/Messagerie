@@ -1,4 +1,4 @@
-package com.eilco.messagerie.service;
+package com.eilco.messagerie.services.interfaces;
 
 
 import com.eilco.messagerie.repositories.entities.Message;
