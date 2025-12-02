@@ -1,30 +1,27 @@
 package com.eilco.messagerie.services.implementations;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.eilco.messagerie.mappers.GroupMapper;
 import com.eilco.messagerie.models.request.GroupRequest;
 import com.eilco.messagerie.models.response.GroupResponse;
-import com.eilco.messagerie.repositories.entities.Group;
-import com.eilco.messagerie.repositories.entities.User;
 import com.eilco.messagerie.repositories.GroupRepository;
 import com.eilco.messagerie.repositories.UserRepository;
+import com.eilco.messagerie.repositories.entities.Group;
+import com.eilco.messagerie.repositories.entities.User;
 import com.eilco.messagerie.services.interfaces.IGroupService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class GroupService implements IGroupService {
 
-    @Autowired
-    private GroupRepository groupRepo;
-
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private GroupMapper groupMapper;
-    @Autowired
-    private GroupRepository groupRepository;
+    private final GroupRepository groupRepository;
+    private final UserRepository userRepository;
+    private final GroupMapper groupMapper;
 
     @Override
     public GroupResponse createGroup(GroupRequest groupRequest) {
@@ -37,24 +34,21 @@ public class GroupService implements IGroupService {
             throw new IllegalStateException("User is already assigned to a group");
         }
 
-        GroupResponse savedGroup = groupMapper.toResponse(
-                groupRepository.save(
-                        groupMapper.toEntity(groupRequest)
-                )
-        );
+        Group groupToSave = groupMapper.toEntity(groupRequest);
+        groupToSave.setCreator(dbCreator);
 
-        // Assign the new group to the creator
-        dbCreator.setGroup(groupMapper.toEntity(groupRequest));
+        Group savedGroup = groupRepository.save(groupToSave);
+        dbCreator.setGroup(savedGroup);
         userRepository.save(dbCreator);
 
-        return savedGroup;
+        return groupMapper.toResponse(savedGroup);
     }
 
 
+    @Override
     public void deleteGroup(Long groupId){
         // Fetch the group
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
+        Group group = getById(groupId);
 
 
         // Find all users assigned to this group and set their group field to null
@@ -88,8 +82,7 @@ public class GroupService implements IGroupService {
     public void addMember(Long groupId, Long userId, Long requesterId) {
 
         // Récupération des entités
-        Group group = groupRepo.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
+        Group group = getById(groupId);
 
         User requester = userRepository.findById(requesterId)
                 .orElseThrow(() -> new RuntimeException("Requester not found"));
@@ -115,8 +108,7 @@ public class GroupService implements IGroupService {
     @Override
     public void removeMember(Long groupId, Long userId, Long requesterId) {
 
-        Group group = groupRepo.findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
+        Group group = getById(groupId);
 
         User requester = userRepository.findById(requesterId)
                 .orElseThrow(() -> new RuntimeException("Requester not found"));
@@ -125,7 +117,7 @@ public class GroupService implements IGroupService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // 1. Vérifier que le requester est le créateur du groupe
-        if (!group.getCreator().getId().equals(requester.getId())) {
+        if (!isAdminOfGroup(requester, group)) {
             throw new RuntimeException("Not authorized");
         }
 
@@ -145,4 +137,17 @@ public class GroupService implements IGroupService {
         userRepository.save(member);  // persister la suppression du lien
     }
 
+    @Override
+    public Group getById(Long groupId) {
+        return groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+    }
+
+    @Override
+    public boolean isAdminOfGroup(User user, Group group) {
+        if (user == null || group == null || group.getCreator() == null) {
+            return false;
+        }
+        return group.getCreator().getId().equals(user.getId());
+    }
 }

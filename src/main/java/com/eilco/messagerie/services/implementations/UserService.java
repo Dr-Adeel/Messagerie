@@ -1,25 +1,32 @@
 package com.eilco.messagerie.services.implementations;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.eilco.messagerie.mappers.UserMapper;
 import com.eilco.messagerie.models.request.UserRequest;
 import com.eilco.messagerie.models.response.UserResponse;
 import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.User;
-import com.eilco.messagerie.services.implementations.GroupService;
+import com.eilco.messagerie.services.interfaces.IGroupService;
 import com.eilco.messagerie.services.interfaces.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.eilco.messagerie.services.security.AuthorizationService;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements IUserService {
 
     private final UserRepository userRepository;
-    private final GroupService groupService;
+    private final IGroupService groupService;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
