@@ -1,3 +1,5 @@
+package com.eilco.messagerie.controllers;
+
 import com.eilco.messagerie.models.request.MessageRequest;
 import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.User;
