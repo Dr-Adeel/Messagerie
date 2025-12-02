@@ -10,10 +10,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/group")
 @RestController
+@RequestMapping("/api/group")
 public class GroupController {
 
     private final IGroupService groupService;
@@ -21,34 +22,43 @@ public class GroupController {
 
     @PostMapping
     public ResponseEntity<GroupResponse> createGroup(@Valid @RequestBody GroupRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(groupService.createGroup(request));
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(groupService.createGroup(request));
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {
-        groupService.deleteGroup(id);
-        return ResponseEntity.noContent().build();
+        try {
+            groupService.deleteGroup(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     @PostMapping("/{groupId}/member/{userId}")
     public ResponseEntity<String> addMember(@PathVariable Long groupId, @PathVariable Long userId) {
         User currentUser = currentUserService.getCurrentUser();
-        if(currentUser != null) {
+        try {
             groupService.addMember(groupId, userId, currentUser.getId());
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body("Member added successfully !");
+            return ResponseEntity.ok("Member added successfully!");
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
-        return ResponseEntity.status(HttpStatus.OK)
-                .body("A problem encountered while adding a member !");
-
     }
 
     @DeleteMapping("/{groupId}/member/{userId}")
     public ResponseEntity<Void> deleteMember(@PathVariable Long groupId, @PathVariable Long userId) {
         User currentUser = currentUserService.getCurrentUser();
-        groupService.removeMember(groupId,userId, currentUser.getId());
-        return ResponseEntity.noContent().build();
+        try {
+            groupService.removeMember(groupId, userId, currentUser.getId());
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
-
 }

@@ -17,9 +17,11 @@ public class UserRequest {
     private String password;
 
     @NotBlank(message = "Le prénom est requis.")
+    @Size(min = 2, max = 50, message = "Le prénom doit contenir entre 2 et 50 caractères.")
     private String firstName;
 
     @NotBlank(message = "Le nom de famille est requis.")
+    @Size(min = 2, max = 50, message = "Le nom de famille doit contenir entre 2 et 50 caractères.")
     private String lastName;
 
     // L'ID du groupe si l'utilisateur est ajouté à un groupe lors de sa création.

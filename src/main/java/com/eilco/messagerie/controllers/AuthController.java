@@ -2,7 +2,7 @@ package com.eilco.messagerie.controllers;
 
 import com.eilco.messagerie.models.request.UserRequest;
 import com.eilco.messagerie.models.response.UserResponse;
-import com.eilco.messagerie.services.JWTService;
+import com.eilco.messagerie.services.implementations.JWTService;
 import com.eilco.messagerie.services.interfaces.IUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

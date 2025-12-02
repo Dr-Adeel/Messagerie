@@ -13,31 +13,52 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/user")
 @RestController
+@RequestMapping("/api/user")
 public class UserController {
 
     private final IUserService userService;
 
     @GetMapping("/{id}")
-    public UserResponse getUser(@PathVariable Long id) {
-        return userService.getById(id);
+    public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(userService.getById(id));
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     @GetMapping("/all")
-    public List<UserResponse> getUsers() {
-        return userService.getAll();
+    public ResponseEntity<List<UserResponse>> getUsers() {
+        return ResponseEntity.ok(userService.getAll());
+    }
+
+    @PostMapping
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody UserRequest request) {
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(request));
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<UserResponse> update(@PathVariable Long id, @Valid @RequestBody UserRequest request) {
-        return ResponseEntity.ok(userService.update(id, request));
+        try {
+            return ResponseEntity.ok(userService.update(id, request));
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        userService.delete(id);
-        return ResponseEntity.noContent().build();
+        try {
+            userService.delete(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
+        }
     }
 
     @GetMapping(value = "/search", params = "name")
@@ -51,7 +72,7 @@ public class UserController {
     @GetMapping(value = "/search", params = "username")
     public ResponseEntity<List<UserResponse>> searchByUsername(@RequestParam String username) {
         if (username == null || username.trim().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Search name cannot be empty");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Search username cannot be empty");
         }
         return ResponseEntity.ok(userService.searchByUsername(username));
     }
