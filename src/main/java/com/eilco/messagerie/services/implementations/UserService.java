@@ -6,9 +6,7 @@ import com.eilco.messagerie.models.response.UserResponse;
 import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.User;
-import com.eilco.messagerie.services.implementations.GroupService;
 import com.eilco.messagerie.services.interfaces.IUserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
