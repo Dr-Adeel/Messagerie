@@ -18,6 +18,7 @@ import com.eilco.messagerie.services.interfaces.IUserService;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements IUserService {
 
     private final UserRepository userRepository;

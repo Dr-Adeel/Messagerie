@@ -1,5 +1,6 @@
 package com.eilco.messagerie.services.implementations;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +39,7 @@ class DirectMessageServiceTest {
     private DirectMessageService service;
 
     @BeforeEach
+    @SuppressWarnings("unused")
     void setUp() {
         service = new DirectMessageService(messageRepository, userRepository, messageMapper);
     }
@@ -104,21 +106,48 @@ class DirectMessageServiceTest {
 
     @Test
     void getPrivateConversation_returnsMappedResponses() {
+        DirectMessageService serviceWithRealMapper = new DirectMessageService(
+                messageRepository, userRepository, new MessageMapper());
+
+        User alice = new User();
+        alice.setId(1L);
+        alice.setUsername("alice");
+        User bob = new User();
+        bob.setId(2L);
+        bob.setUsername("bob");
+
         Message first = new Message();
+        first.setId(1L);
+        first.setContent("Hello Bob");
+        first.setTimestamp(LocalDateTime.of(2024, 1, 1, 10, 0));
+        first.setSender(alice);
+        first.setReceiverUser(bob);
+
         Message second = new Message();
+        second.setId(2L);
+        second.setContent("Hi Alice");
+        second.setTimestamp(LocalDateTime.of(2024, 1, 1, 10, 5));
+        second.setSender(bob);
+        second.setReceiverUser(alice);
+
         given(messageRepository.findConversationBetweenUsers(1L, 2L))
                 .willReturn(List.of(first, second));
 
-        MessageResponse firstResponse = new MessageResponse();
-        firstResponse.setId(1L);
-        MessageResponse secondResponse = new MessageResponse();
-        secondResponse.setId(2L);
-        given(messageMapper.toResponse(first)).willReturn(firstResponse);
-        given(messageMapper.toResponse(second)).willReturn(secondResponse);
+        List<MessageResponse> responses = serviceWithRealMapper.getPrivateConversation(1L, 2L);
 
-        List<MessageResponse> responses = service.getPrivateConversation(1L, 2L);
+        assertThat(responses).hasSize(2);
+        assertThat(responses.get(0).getId()).isEqualTo(1L);
+        assertThat(responses.get(0).getContent()).isEqualTo("Hello Bob");
+        assertThat(responses.get(0).getSenderUsername()).isEqualTo("alice");
+        assertThat(responses.get(0).getReceiverUsername()).isEqualTo("bob");
+        assertThat(responses.get(0).getMessageType()).isEqualTo("DM");
 
-        assertThat(responses).containsExactly(firstResponse, secondResponse);
+        assertThat(responses.get(1).getId()).isEqualTo(2L);
+        assertThat(responses.get(1).getContent()).isEqualTo("Hi Alice");
+        assertThat(responses.get(1).getSenderUsername()).isEqualTo("bob");
+        assertThat(responses.get(1).getReceiverUsername()).isEqualTo("alice");
+        assertThat(responses.get(1).getMessageType()).isEqualTo("DM");
+
         verify(messageRepository).findConversationBetweenUsers(1L, 2L);
     }
 }
