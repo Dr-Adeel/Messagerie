@@ -1,4 +1,4 @@
-package com.eilco.messagerie.controller;
+package com.eilco.messagerie.controllers;
 
 
 import com.eilco.messagerie.models.request.MessageRequest;

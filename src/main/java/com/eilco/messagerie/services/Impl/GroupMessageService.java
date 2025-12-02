@@ -1,5 +1,7 @@
 package com.eilco.messagerie.services.Impl;
 
+import com.eilco.messagerie.mappers.MessageMapper;
+import com.eilco.messagerie.models.response.MessageResponse;
 import com.eilco.messagerie.repositories.GroupRepository;
 import com.eilco.messagerie.repositories.MessageRepository;
 import com.eilco.messagerie.repositories.UserRepository;
@@ -29,7 +31,7 @@ public class GroupMessageService implements IGroupMessageService {
      * ENVOYER UN MESSAGE DANS UN GROUPE
      */
     @Override
-    public Message sendMessageGroup(Long senderId, Long groupId, String content) {
+    public MessageResponse sendMessageGroup(Long senderId, Long groupId, String content) {
 
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
@@ -50,14 +52,14 @@ public class GroupMessageService implements IGroupMessageService {
         message.setReceiverUser(null); // car message de groupe
         message.setTimestamp(LocalDateTime.now());
 
-        return messageRepository.save(message);
+        return MessageMapper.toResponse(messageRepository.save(message));
     }
 
     /**
      * RÉCUPÉRER L'HISTORIQUE DES MESSAGES DU GROUPE
      */
     @Override
-    public List<Message> getGroupMessages(Long groupId, Long userId) {
+    public List<MessageResponse> getGroupMessages(Long groupId, Long userId) {
 
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Groupe introuvable"));
@@ -71,6 +73,7 @@ public class GroupMessageService implements IGroupMessageService {
         }
 
         // Retourner les messages du groupe triés par date croissante
-        return messageRepository.findByReceiverGroupIdOrderByTimestampAsc(groupId);
+        return MessageMapper.toResponse(messageRepository.findByReceiverGroupIdOrderByTimestampAsc(groupId));
+
     }
 }

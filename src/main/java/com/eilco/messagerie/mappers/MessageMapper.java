@@ -6,11 +6,14 @@ import com.eilco.messagerie.repositories.entities.Message;
 import com.eilco.messagerie.repositories.entities.User;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class MessageMapper {
 
 
-    public MessageResponse toResponse(Message message) {
+    public static MessageResponse toResponse(Message message) {
         if (message == null) {
             return null;
         }
@@ -43,6 +46,15 @@ public class MessageMapper {
         }
 
         return response;
+    }
+
+    public static List<MessageResponse> toResponse(List<Message> messages) {
+        if (messages == null || messages.isEmpty()) {
+            return List.of(); // Retourne une liste vide immuable
+        }
+        return messages.stream()
+                .map(MessageMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
 

@@ -1,12 +1,13 @@
 package com.eilco.messagerie.services;
 
 
+import com.eilco.messagerie.models.response.MessageResponse;
 import com.eilco.messagerie.repositories.entities.Message;
 
 import java.util.List;
 
 public interface IGroupMessageService {
-    Message sendMessageGroup(Long senderId, Long groupId, String content);
+    MessageResponse sendMessageGroup(Long senderId, Long groupId, String content);
 
-    List<Message> getGroupMessages(Long groupId, Long userId);
+    List<MessageResponse> getGroupMessages(Long groupId, Long userId);
 }
