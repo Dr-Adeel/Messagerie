@@ -1,4 +1,10 @@
-package com.eilco.messagerie.services;
+package com.eilco.messagerie.services.implementations;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 import com.eilco.messagerie.mappers.UserMapper;
 import com.eilco.messagerie.models.request.UserRequest;
@@ -6,37 +12,21 @@ import com.eilco.messagerie.models.response.UserResponse;
 import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.User;
-import com.eilco.messagerie.services.implementations.GroupService;
+import com.eilco.messagerie.services.interfaces.IGroupService;
 import com.eilco.messagerie.services.interfaces.IUserService;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import com.eilco.messagerie.services.security.AuthorizationService;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements IUserService {
 
     private final UserRepository userRepository;
-    private final GroupService groupService;
+    private final IGroupService groupService;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthorizationService authorizationService; // Équipe 2
-
-
-    public UserService(
-            UserRepository userRepository,
-            GroupService groupService,
-            UserMapper userMapper,
-            PasswordEncoder passwordEncoder,
-            AuthorizationService authorizationService
-    ) {
-        this.userRepository = userRepository;
-        this.groupService = groupService;
-        this.userMapper = userMapper;
-        this.passwordEncoder = passwordEncoder;
-        this.authorizationService = authorizationService;
-    }
 
 
     // CREATE USER

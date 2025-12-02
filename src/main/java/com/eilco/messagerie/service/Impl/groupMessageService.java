@@ -1,4 +1,4 @@
-package com.eilco.messagerie.service.Impl;
+package com.eilco.messagerie.service.impl;
 
 import com.eilco.messagerie.repositories.GroupRepository;
 import com.eilco.messagerie.repositories.MessageRepository;
