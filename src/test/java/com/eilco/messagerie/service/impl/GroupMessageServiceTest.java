@@ -12,6 +12,8 @@ import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.Message;
 import com.eilco.messagerie.repositories.entities.User;
+import com.eilco.messagerie.service.Impl.GroupMessageService;
+
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
