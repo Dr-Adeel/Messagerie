@@ -3,6 +3,7 @@ package com.eilco.messagerie.services;
 import com.eilco.messagerie.mappers.UserMapper;
 import com.eilco.messagerie.models.request.UserRequest;
 import com.eilco.messagerie.models.response.UserResponse;
+import com.eilco.messagerie.repositories.GroupRepository;
 import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.User;
@@ -22,6 +23,7 @@ public class UserService implements IUserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthorizationService authorizationService; // Équipe 2
+    private final GroupRepository groupRepository;
 
 
     public UserService(
@@ -29,13 +31,14 @@ public class UserService implements IUserService {
             GroupService groupService,
             UserMapper userMapper,
             PasswordEncoder passwordEncoder,
-            AuthorizationService authorizationService
-    ) {
+            AuthorizationService authorizationService,
+            GroupRepository groupRepository) {
         this.userRepository = userRepository;
         this.groupService = groupService;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
         this.authorizationService = authorizationService;
+        this.groupRepository = groupRepository;
     }
 
 
@@ -53,7 +56,7 @@ public class UserService implements IUserService {
         //  Cas où l’utilisateur doit être ajouté à un groupe
         if (request.getGroupId() != null) {
 
-            Group group = groupService.getById(request.getGroupId());
+            Group group = groupRepository.getById(request.getGroupId());
 
             //  On récupère l'utilisateur connecté (via Security)
             User currentUser = authorizationService.getCurrentUser();

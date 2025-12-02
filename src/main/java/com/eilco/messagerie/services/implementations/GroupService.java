@@ -17,9 +17,6 @@ import java.util.List;
 public class GroupService implements IGroupService {
 
     @Autowired
-    private GroupRepository groupRepo;
-
-    @Autowired
     private UserRepository userRepository;
     @Autowired
     private GroupMapper groupMapper;
@@ -68,12 +65,18 @@ public class GroupService implements IGroupService {
         groupRepository.delete(group);
     }
 
+    @Override
+    public Group getById(Long id) {
+        return groupRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Group not found with ID: " + id));
+    }
+
 
     @Override
     public void addMember(Long groupId, Long userId, Long requesterId) {
 
         // Récupération des entités
-        Group group = groupRepo.findById(groupId)
+        Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Group not found"));
 
         User requester = userRepository.findById(requesterId)
@@ -100,7 +103,7 @@ public class GroupService implements IGroupService {
     @Override
     public void removeMember(Long groupId, Long userId, Long requesterId) {
 
-        Group group = groupRepo.findById(groupId)
+        Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Group not found"));
 
         User requester = userRepository.findById(requesterId)
