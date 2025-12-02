@@ -22,7 +22,6 @@ import com.eilco.messagerie.services.security.AuthorizationService;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class UserService implements IUserService {
 
     private final UserRepository userRepository;
