@@ -26,11 +26,8 @@ public class Group {
     @Column(unique = true, nullable = false)
     private String name;
 
-//    @JsonIgnoreProperties({"group"})
-//    @OneToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "creator_user_id", nullable = false)
-//    private User creator;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_user_id", nullable = false)
+    private User creator;
 
-//    @OneToMany(fetch = FetchType.LAZY)
-//    private List<User> members;
 }

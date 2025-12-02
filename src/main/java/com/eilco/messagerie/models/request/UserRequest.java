@@ -4,6 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import lombok.Builder;
+
+@Builder
 @Data
 public class UserRequest {
 
