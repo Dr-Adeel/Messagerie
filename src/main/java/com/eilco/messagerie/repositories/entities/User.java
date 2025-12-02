@@ -46,11 +46,6 @@ public class User {
     @JoinColumn(name = "group_id")
     private Group group;
 
-    public User orElseThrow(Object object) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'orElseThrow'");
-    }
-
 }
 
 

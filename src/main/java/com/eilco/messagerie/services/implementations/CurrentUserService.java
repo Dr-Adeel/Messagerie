@@ -21,7 +21,7 @@ public class CurrentUserService {
         // Récupération de l'utilisateur par nom d'utilisateur (username)
         User user = userRepository.findByUsername(username);
         if (user == null) {
-            throw new RuntimeException("Current user not found.");
+            throw new RuntimeException("Utilisateur courant introuvable");
         }
         return user;
     }
