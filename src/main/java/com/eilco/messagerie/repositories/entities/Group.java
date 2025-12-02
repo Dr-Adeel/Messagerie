@@ -26,5 +26,4 @@ public class Group {
     @JoinColumn(name = "creator_user_id", nullable = false)
     private User creator;
 
-
 }
