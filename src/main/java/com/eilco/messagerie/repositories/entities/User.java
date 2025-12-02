@@ -27,12 +27,15 @@ public class User {
     private String firstName;
     private String lastName;
 
-    // Relation ManyToOne: Un utilisateur appartient à UN SEUL groupe.
-    // Cette colonne 'group_id' sera créée dans la table 'app_user'.
-//    @JsonManagedReference
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "group_id")
-//    private Group group;
+//     Relation ManyToOne: Un utilisateur appartient à UN SEUL groupe.
+//     Cette colonne 'group_id' sera créée dans la table 'app_user'.
+    @JsonManagedReference
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "group_id")
+    private Group group;
+
+    private Boolean isGroupOwner;
+
 
 }
 

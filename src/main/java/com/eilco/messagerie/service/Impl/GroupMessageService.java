@@ -37,12 +37,8 @@ public class GroupMessageService implements IGroupMessageService {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Groupe introuvable"));
 
-        // Vérifier que l'utilisateur est membre du groupe
-        boolean isMember = group.getMembers()
-                .stream()
-                .anyMatch(member -> member.getId().equals(senderId));
-
-        if (!isMember) {
+        // Vérifier que l'utilisateur appartient bien au groupe
+        if (sender.getGroup() == null || !sender.getGroup().getId().equals(groupId)) {
             throw new IllegalStateException("Vous n’êtes pas membre de ce groupe");
         }
 
@@ -68,15 +64,12 @@ public class GroupMessageService implements IGroupMessageService {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
-        System.out.println("111111111");
-        // Vérifier que l'utilisateur est membre du groupe
-        boolean isMember = group.getMembers()
-                .stream()
-                .anyMatch(member -> member.getId().equals(userId));
-        System.out.println("22222222");
-        if (!isMember) {
+
+        // Vérifier que l'utilisateur appartient bien au groupe
+        if (user.getGroup() == null || !user.getGroup().getId().equals(groupId)) {
             throw new IllegalStateException("Accès refusé : Vous ne faites pas partie de ce groupe");
         }
+
         // Retourner les messages du groupe triés par date croissante
         return messageRepository.findByReceiverGroupIdOrderByTimestampAsc(groupId);
     }

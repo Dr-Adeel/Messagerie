@@ -1,6 +1,7 @@
 package com.eilco.messagerie.repositories.entities;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -26,10 +27,10 @@ public class Group {
     private String name;
 
 //    @JsonIgnoreProperties({"group"})
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_user_id", nullable = false)
-    private User creator;
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "creator_user_id", nullable = false)
+//    private User creator;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<User> members;
+//    @OneToMany(fetch = FetchType.LAZY)
+//    private List<User> members;
 }

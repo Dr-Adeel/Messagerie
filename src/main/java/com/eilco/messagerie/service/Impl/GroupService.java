@@ -29,14 +29,9 @@ public class GroupService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
 
-        // Ajouter l'utilisateur à la liste des membres
-        List<User> members = group.getMembers();
-        if (!members.contains(user)) {
-            members.add(user);
-            group.setMembers(members);
+        if (user.getGroup() == null || !user.getGroup().getId().equals(groupId)) {
+            user.setGroup(group);
+            userRepository.save(user);
         }
-
-        // Sauvegarder le groupe pour persister le changement
-        groupRepository.save(group);
     }
 }
