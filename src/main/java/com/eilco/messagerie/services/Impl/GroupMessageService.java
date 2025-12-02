@@ -1,4 +1,4 @@
-package com.eilco.messagerie.service.Impl;
+package com.eilco.messagerie.services.Impl;
 
 import com.eilco.messagerie.repositories.GroupRepository;
 import com.eilco.messagerie.repositories.MessageRepository;
@@ -6,7 +6,7 @@ import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.Message;
 import com.eilco.messagerie.repositories.entities.User;
-import com.eilco.messagerie.service.IGroupMessageService;
+import com.eilco.messagerie.services.IGroupMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

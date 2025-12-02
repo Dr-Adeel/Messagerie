@@ -2,7 +2,7 @@ package com.eilco.messagerie.controller;
 
 
 import com.eilco.messagerie.models.request.MessageRequest;
-import com.eilco.messagerie.service.Impl.GroupMessageService;
+import com.eilco.messagerie.services.Impl.GroupMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

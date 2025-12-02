@@ -1,4 +1,4 @@
-package com.eilco.messagerie.service.Impl;
+package com.eilco.messagerie.services.Impl;
 
 import com.eilco.messagerie.repositories.GroupRepository;
 import com.eilco.messagerie.repositories.UserRepository;
@@ -6,8 +6,6 @@ import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * @author akdim
