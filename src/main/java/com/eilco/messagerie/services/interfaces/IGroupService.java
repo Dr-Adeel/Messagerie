@@ -15,6 +15,5 @@ public interface IGroupService {
     void addMember(Long groupId, Long userId, Long requesterId);
 
     void removeMember(Long groupId, Long userId, Long requesterId);
-    // Method to delete a group by its ID
-
+    public boolean isAdminOfGroup(User user, Group group);
 }
