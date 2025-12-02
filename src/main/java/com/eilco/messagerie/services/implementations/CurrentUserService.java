@@ -1,10 +1,12 @@
 package com.eilco.messagerie.services.implementations;
 
-import com.eilco.messagerie.repositories.UserRepository;
-import com.eilco.messagerie.repositories.entities.User;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import com.eilco.messagerie.repositories.UserRepository;
+import com.eilco.messagerie.repositories.entities.User;
+
+import lombok.RequiredArgsConstructor;
 
 
 @RequiredArgsConstructor
@@ -17,8 +19,11 @@ public class CurrentUserService {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // Récupération de l'utilisateur par nom d'utilisateur (username)
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new RuntimeException("Current user not found.");
+        }
+        return user;
     }
 
 }
