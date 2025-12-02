@@ -82,11 +82,7 @@ public class GroupService implements IGroupService {
         return group.getCreator() != null && group.getCreator().getId().equals(user.getId());
     }
 
-    @Override
-    public Group getById(Long id) {
-        return groupRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Group not found with ID: " + id));
-    }
+
     @Override
     public void addMember(Long groupId, Long userId, Long requesterId) {
 
