@@ -1,21 +1,19 @@
 package com.eilco.messagerie.controllers;
 
-import com.eilco.messagerie.models.request.UserRequest;
-import com.eilco.messagerie.models.response.UserResponse;
-import com.eilco.messagerie.repositories.UserRepository;
-import com.eilco.messagerie.services.IUserService;
-import com.eilco.messagerie.services.JWTService;
-import com.eilco.messagerie.services.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.http.ResponseEntity;
+
+import com.eilco.messagerie.models.request.UserRequest;
+import com.eilco.messagerie.models.response.UserResponse;
+import com.eilco.messagerie.services.JWTService;
+import com.eilco.messagerie.services.interfaces.IUserService;
+
 import jakarta.validation.Valid;
-
-
-import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @RestController
@@ -35,7 +33,7 @@ public class SecurityController {
     @PostMapping("/register")
     public ResponseEntity<UserResponse> register(@Valid @RequestBody UserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(userService.saveUser(request));
+                .body(userService.create(request));
     }
 
 

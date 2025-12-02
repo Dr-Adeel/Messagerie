@@ -1,9 +1,8 @@
 package com.eilco.messagerie.testMappers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -74,12 +73,13 @@ public class TestUserMapper {
 
     @Test
     void toEntityMapsRequestToEntityWithoutSensitiveFields() {
-        UserRequest request = new UserRequest();
-        request.setUsername("jane.doe");
-        request.setPassword("secretPassword!");
-        request.setFirstName("Jane");
-        request.setLastName("Doe");
-        request.setGroupId(11L);
+        UserRequest request = UserRequest.builder()
+            .username("jane.doe")
+            .password("secretPassword!")
+            .firstName("Jane")
+            .lastName("Doe")
+            .groupId(11L)
+            .build();
 
         User entity = userMapper.toEntity(request);
 

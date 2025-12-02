@@ -1,12 +1,9 @@
 package com.eilco.messagerie.services;
 
-
-import com.eilco.messagerie.models.request.UserRequest;
-import com.eilco.messagerie.models.response.UserResponse;
-
-public interface IUserService {
-    UserResponse saveUser(UserRequest request);
-
-    void deleteUser(Long id);
-    UserResponse updateUser(Long id, UserRequest request);
+/**
+ * Legacy alias kept for backward compatibility. The actual contract lives in
+ * {@link com.eilco.messagerie.services.interfaces.IUserService}.
+ */
+@Deprecated
+public interface IUserService extends com.eilco.messagerie.services.interfaces.IUserService {
 }
