@@ -17,10 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ChatService implements IChatService {
@@ -113,7 +114,7 @@ public class ChatService implements IChatService {
         MessageResponse response = messageMapper.toResponse(savedMessage);
         Map<String, Object> frontMessage = convertToFrontFormat(response);
 
-        // Envoyer au destinataire via le topic
+        // Envoyer au destinataire via un topic personnalisé
         if (response.getReceiverUsername() != null) {
             messagingTemplate.convertAndSend(
                     "/topic/user/" + response.getReceiverUsername(),
@@ -131,6 +132,7 @@ public class ChatService implements IChatService {
 
     @Override
     public void registerUser(String username, String sessionId) {
+        // Vérifier que le username est fourni
         if (username == null || username.trim().isEmpty()) {
             throw new IllegalArgumentException("Le nom d'utilisateur est requis");
         }
@@ -152,12 +154,26 @@ public class ChatService implements IChatService {
         // Récupérer la liste des utilisateurs en ligne
         Set<String> onlineUsers = userSessionService.getOnlineUsers();
 
-        Map<String, Object> onlineUsersMessage = new HashMap<>();
-        onlineUsersMessage.put("type", "ONLINE_USERS");
-        onlineUsersMessage.put("users", new ArrayList<>(onlineUsers));
-        messagingTemplate.convertAndSend("/topic/user/" + validUsername + "/online.users", onlineUsersMessage);
+        // Récupérer tous les utilisateurs de la base de données
+        List<User> allUsers = userRepository.findAll();
 
-        // Notifier tous les utilisateurs qu'un utilisateur est en ligne
+        // Créer une liste de tous les utilisateurs avec leur statut
+        List<Map<String, Object>> usersWithStatus = allUsers.stream()
+                .map(u -> {
+                    Map<String, Object> userInfo = new HashMap<>();
+                    userInfo.put("username", u.getUsername());
+                    userInfo.put("online", onlineUsers.contains(u.getUsername()));
+                    return userInfo;
+                })
+                .collect(Collectors.toList());
+
+        // Envoyer la liste complète des utilisateurs avec leur statut au nouvel utilisateur
+        Map<String, Object> allUsersMessage = new HashMap<>();
+        allUsersMessage.put("type", "ALL_USERS");
+        allUsersMessage.put("users", usersWithStatus);
+        messagingTemplate.convertAndSend("/topic/user/" + validUsername + "/online.users", allUsersMessage);
+
+        // Notifier tous les utilisateurs (y compris le nouvel utilisateur) qu'un utilisateur est en ligne
         UserStatusNotification notification = new UserStatusNotification(validUsername, true);
         messagingTemplate.convertAndSend("/topic/user.status", notification);
 
