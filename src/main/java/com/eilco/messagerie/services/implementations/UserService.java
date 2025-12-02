@@ -14,10 +14,6 @@ import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.User;
 import com.eilco.messagerie.services.interfaces.IGroupService;
 import com.eilco.messagerie.services.interfaces.IUserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import com.eilco.messagerie.services.security.AuthorizationService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,19 +25,6 @@ public class UserService implements IUserService {
     private final IGroupService groupService;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
-
-
-    public UserService(
-            UserRepository userRepository,
-            GroupService groupService,
-            UserMapper userMapper,
-            PasswordEncoder passwordEncoder
-    ) {
-        this.userRepository = userRepository;
-        this.groupService = groupService;
-        this.userMapper = userMapper;
-        this.passwordEncoder = passwordEncoder;
-    }
 
 
     // CREATE USER
@@ -58,6 +41,11 @@ public class UserService implements IUserService {
 
         // Encoder le mot de passe fourni par l'utilisateur
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        if (request.getGroupId() != null) {
+            Group group = groupService.getById(request.getGroupId());
+            user.setGroup(group);
+        }
 
         // Sauvegarder l'utilisateur sans gestion de groupe ou autorisations
         User savedUser = userRepository.save(user);

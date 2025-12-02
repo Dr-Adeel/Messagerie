@@ -1,12 +1,22 @@
 package com.eilco.messagerie.services.implementations;
 
+import java.util.List;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import org.mockito.Mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.eilco.messagerie.mappers.UserMapper;
 import com.eilco.messagerie.models.request.UserRequest;
@@ -15,16 +25,6 @@ import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.User;
 import com.eilco.messagerie.services.interfaces.IGroupService;
-import com.eilco.messagerie.services.security.AuthorizationService;
-import java.util.List;
-import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -38,33 +38,34 @@ class UserServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
-    @Mock
-    private AuthorizationService authorizationService;
-
     private UserService userService;
 
+    @SuppressWarnings("unused")
     @BeforeEach
     void setUp() {
-        userService = new UserService(userRepository, groupService, new UserMapper(), passwordEncoder, authorizationService);
+        userService = new UserService(userRepository, groupService, new UserMapper(), passwordEncoder);
     }
 
     @Test
     void create_throwsWhenUsernameExists() {
-        UserRequest request = new UserRequest();
-        request.setUsername("john");
+        UserRequest request = UserRequest.builder()
+            .username("john")
+            .build();
         given(userRepository.existsByUsername("john")).willReturn(true);
 
-        assertThrows(RuntimeException.class, () -> userService.create(request));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.create(request));
+        assertThat(exception.getMessage()).contains("existe déjà");
         verify(userRepository, never()).save(any());
     }
 
     @Test
     void create_savesUserWithoutGroup() {
-        UserRequest request = new UserRequest();
-        request.setUsername("john");
-        request.setPassword("pwd");
-        request.setFirstName("John");
-        request.setLastName("Doe");
+        UserRequest request = UserRequest.builder()
+            .username("john")
+            .password("pwd")
+            .firstName("John")
+            .lastName("Doe")
+            .build();
 
         given(userRepository.existsByUsername("john")).willReturn(false);
         given(passwordEncoder.encode("pwd")).willReturn("encoded");
@@ -85,24 +86,21 @@ class UserServiceTest {
     }
 
     @Test
-    void create_addsUserToGroupWhenAuthorized() {
+    void create_addsUserToGroupWhenGroupProvided() {
         Group group = new Group();
         group.setId(5L);
-        User admin = new User();
-        admin.setId(99L);
 
-        UserRequest request = new UserRequest();
-        request.setUsername("member");
-        request.setPassword("pwd");
-        request.setFirstName("Mem");
-        request.setLastName("Ber");
-        request.setGroupId(5L);
+        UserRequest request = UserRequest.builder()
+                .username("member")
+                .password("pwd")
+                .firstName("Mem")
+                .lastName("Ber")
+                .groupId(5L)
+                .build();
 
         given(userRepository.existsByUsername("member")).willReturn(false);
         given(passwordEncoder.encode("pwd")).willReturn("encoded");
         given(groupService.getById(5L)).willReturn(group);
-        given(authorizationService.getCurrentUser()).willReturn(admin);
-        given(groupService.isAdminOfGroup(admin, group)).willReturn(true);
 
         User persisted = new User();
         persisted.setId(2L);
@@ -117,25 +115,21 @@ class UserServiceTest {
     }
 
     @Test
-    void create_deniesWhenCurrentUserNotAdminOfGroup() {
-        Group group = new Group();
-        group.setId(5L);
-        User current = new User();
-        current.setId(4L);
-
-        UserRequest request = new UserRequest();
-        request.setUsername("member");
-        request.setPassword("pwd");
-        request.setFirstName("Mem");
-        request.setLastName("Ber");
-        request.setGroupId(5L);
+    void create_throwsWhenGroupLookupFails() {
+        UserRequest request = UserRequest.builder()
+                .username("member")
+                .password("pwd")
+                .firstName("Mem")
+                .lastName("Ber")
+                .groupId(5L)
+                .build();
 
         given(userRepository.existsByUsername("member")).willReturn(false);
-        given(groupService.getById(5L)).willReturn(group);
-        given(authorizationService.getCurrentUser()).willReturn(current);
-        given(groupService.isAdminOfGroup(current, group)).willReturn(false);
+        given(passwordEncoder.encode("pwd")).willReturn("encoded");
+        given(groupService.getById(5L)).willThrow(new RuntimeException("Groupe introuvable"));
 
-        assertThrows(RuntimeException.class, () -> userService.create(request));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.create(request));
+        assertThat(exception.getMessage()).contains("Groupe introuvable");
         verify(userRepository, never()).save(any());
     }
 
@@ -148,7 +142,6 @@ class UserServiceTest {
 
         UserResponse response = userService.getById(10L);
 
-        verify(authorizationService).checkPermission("USER_READ");
         assertThat(response.getUsername()).isEqualTo("john");
     }
 
@@ -161,7 +154,6 @@ class UserServiceTest {
 
         List<UserResponse> responses = userService.getAll();
 
-        verify(authorizationService).checkPermission("USER_READ");
         assertThat(responses).hasSize(1);
         assertThat(responses.get(0).getUsername()).isEqualTo("alice");
     }
@@ -177,16 +169,16 @@ class UserServiceTest {
         given(passwordEncoder.encode("newPass")).willReturn("encoded");
         given(groupService.getById(3L)).willReturn(group);
 
-        UserRequest request = new UserRequest();
-        request.setUsername("bob");
-        request.setPassword("newPass");
-        request.setFirstName("Bob");
-        request.setLastName("Lee");
-        request.setGroupId(3L);
+        UserRequest request = UserRequest.builder()
+            .username("bob")
+            .password("newPass")
+            .firstName("Bob")
+            .lastName("Lee")
+            .groupId(3L)
+            .build();
 
         userService.update(1L, request);
 
-        verify(authorizationService).checkPermission("USER_UPDATE");
         verify(userRepository).save(user);
         assertThat(user.getPassword()).isEqualTo("encoded");
         assertThat(user.getGroup()).isEqualTo(group);
@@ -200,11 +192,12 @@ class UserServiceTest {
         user.setPassword("existing");
         given(userRepository.findById(1L)).willReturn(Optional.of(user));
 
-        UserRequest request = new UserRequest();
-        request.setUsername("bob");
-        request.setPassword(" ");
-        request.setFirstName("Bob");
-        request.setLastName("Lee");
+        UserRequest request = UserRequest.builder()
+            .username("bob")
+            .password(" ")
+            .firstName("Bob")
+            .lastName("Lee")
+            .build();
 
         userService.update(1L, request);
 
@@ -216,7 +209,8 @@ class UserServiceTest {
     void delete_throwsWhenUserMissing() {
         given(userRepository.existsById(8L)).willReturn(false);
 
-        assertThrows(RuntimeException.class, () -> userService.delete(8L));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userService.delete(8L));
+        assertThat(exception.getMessage()).contains("introuvable");
     }
 
     @Test
@@ -225,7 +219,6 @@ class UserServiceTest {
 
         userService.delete(8L);
 
-        verify(authorizationService).checkPermission("USER_DELETE");
         verify(userRepository).deleteById(8L);
     }
 
@@ -238,7 +231,6 @@ class UserServiceTest {
 
         List<UserResponse> responses = userService.searchByUsername("ali");
 
-        verify(authorizationService).checkPermission("USER_SEARCH");
         assertThat(responses).hasSize(1);
         assertThat(responses.get(0).getUsername()).isEqualTo("alice");
     }
@@ -252,7 +244,6 @@ class UserServiceTest {
 
         List<UserResponse> responses = userService.searchByFirstName("ali");
 
-        verify(authorizationService).checkPermission("USER_SEARCH");
         assertThat(responses).hasSize(1);
         assertThat(responses.get(0).getFirstName()).isEqualTo("Alice");
     }

@@ -1,22 +1,22 @@
 package com.eilco.messagerie.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import static org.mockito.Mockito.verify;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 import com.eilco.messagerie.models.request.UserRequest;
 import com.eilco.messagerie.models.response.UserResponse;
 import com.eilco.messagerie.services.JWTService;
 import com.eilco.messagerie.services.interfaces.IUserService;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
 @ExtendWith(MockitoExtension.class)
 class SecurityControllerTest {
@@ -44,7 +44,14 @@ class SecurityControllerTest {
         UserResponse response = UserResponse.builder().id(1L).username("alice").build();
         given(userService.create(any(UserRequest.class))).willReturn(response);
 
-        ResponseEntity<UserResponse> entity = controller.register(new UserRequest());
+        UserRequest request = UserRequest.builder()
+                .username("alice")
+                .password("pwd12345")
+                .firstName("Alice")
+                .lastName("Doe")
+                .build();
+
+        ResponseEntity<UserResponse> entity = controller.register(request);
 
         assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         assertThat(entity.getBody()).isEqualTo(response);
