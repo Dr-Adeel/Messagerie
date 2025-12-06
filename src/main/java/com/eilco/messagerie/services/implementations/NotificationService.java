@@ -1,4 +1,4 @@
-package com.eilco.messagerie.service;
+package com.eilco.messagerie.services.implementations;
 
 import com.eilco.messagerie.models.request.NotificationRequest;
 import com.eilco.messagerie.models.response.NotificationResponse;

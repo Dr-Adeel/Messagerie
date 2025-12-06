@@ -9,7 +9,7 @@ import com.eilco.messagerie.repositories.entities.Message;
 import com.eilco.messagerie.repositories.entities.Notification;
 import com.eilco.messagerie.repositories.entities.NotificationType;
 import com.eilco.messagerie.repositories.entities.User;
-import com.eilco.messagerie.service.NotificationService;
+import com.eilco.messagerie.services.implementations.NotificationService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

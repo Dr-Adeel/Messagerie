@@ -2,7 +2,7 @@ package com.eilco.messagerie.controllers;
 
 import com.eilco.messagerie.models.request.NotificationRequest;
 import com.eilco.messagerie.models.response.NotificationResponse;
-import com.eilco.messagerie.service.NotificationService;
+import com.eilco.messagerie.services.implementations.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
