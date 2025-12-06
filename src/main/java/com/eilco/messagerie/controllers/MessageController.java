@@ -2,7 +2,8 @@ package com.eilco.messagerie.controllers;
 
 import com.eilco.messagerie.models.request.MessageRequest;
 import com.eilco.messagerie.models.response.MessageResponse;
-import com.eilco.messagerie.services.interfaces.IMessageService;
+import com.eilco.messagerie.service.IDirectMessageService;
+import com.eilco.messagerie.service.IGroupMessageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
