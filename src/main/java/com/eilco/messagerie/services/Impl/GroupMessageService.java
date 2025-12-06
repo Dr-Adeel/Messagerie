@@ -11,11 +11,14 @@ import com.eilco.messagerie.repositories.entities.User;
 import com.eilco.messagerie.services.IGroupMessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Slf4j
+
 public class GroupMessageService implements IGroupMessageService {
 
     @Autowired
@@ -32,6 +35,7 @@ public class GroupMessageService implements IGroupMessageService {
      */
     @Override
     public MessageResponse sendMessageGroup(Long senderId, Long groupId, String content) {
+		log.info("sendMessageGroup : envoi d'un message dans un groupe (senderId={}, groupId={})", senderId,groupId);
 
         User sender = userRepository.findById(senderId)
                 .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
@@ -60,6 +64,7 @@ public class GroupMessageService implements IGroupMessageService {
      */
     @Override
     public List<MessageResponse> getGroupMessages(Long groupId, Long userId) {
+		log.info("getGroupMessages : récupération de l'historique des messages d'un groupe (groupId={}, userId={})", groupId,userId);
 
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new RuntimeException("Groupe introuvable"));
@@ -69,6 +74,7 @@ public class GroupMessageService implements IGroupMessageService {
 
         // Vérifier que l'utilisateur appartient bien au groupe
         if (user.getGroup() == null || !user.getGroup().getId().equals(groupId)) {
+
             throw new IllegalStateException("Accès refusé : Vous ne faites pas partie de ce groupe");
         }
 
