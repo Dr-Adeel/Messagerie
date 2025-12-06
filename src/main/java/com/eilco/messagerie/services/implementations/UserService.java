@@ -1,8 +1,8 @@
 package com.eilco.messagerie.services.implementations;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +14,6 @@ import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.User;
 import com.eilco.messagerie.services.interfaces.IGroupService;
 import com.eilco.messagerie.services.interfaces.IUserService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import com.eilco.messagerie.services.security.AuthorizationService;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -31,26 +26,13 @@ public class UserService implements IUserService {
     private final PasswordEncoder passwordEncoder;
 
 
-    public UserService(
-            UserRepository userRepository,
-            GroupService groupService,
-            UserMapper userMapper,
-            PasswordEncoder passwordEncoder
-    ) {
-        this.userRepository = userRepository;
-        this.groupService = groupService;
-        this.userMapper = userMapper;
-        this.passwordEncoder = passwordEncoder;
-    }
-
-
     // CREATE USER
     @Override
     public UserResponse create(UserRequest request) {
 
         // Vérifier si le nom d'utilisateur existe déjà
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Le nom d'utilisateur existe déjà.");
+            throw new EntityExistsException("Le nom d'utilisateur existe déjà.");
         }
 
         // Mapper la requête vers une entité User
@@ -70,7 +52,7 @@ public class UserService implements IUserService {
     public UserResponse getById(Long id) {
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
 
         return userMapper.toResponse(user);
     }
@@ -82,7 +64,7 @@ public class UserService implements IUserService {
         return userRepository.findAll()
                 .stream()
                 .map(userMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     //  UPDATE
@@ -90,7 +72,7 @@ public class UserService implements IUserService {
     public UserResponse update(Long id, UserRequest request) {
 
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Utilisateur introuvable"));
+                .orElseThrow(() -> new EntityNotFoundException("Utilisateur introuvable"));
 
         user.setUsername(request.getUsername());
         user.setFirstName(request.getFirstName());
@@ -115,7 +97,7 @@ public class UserService implements IUserService {
 
 
         if (!userRepository.existsById(id)) {
-            throw new RuntimeException("Utilisateur introuvable");
+            throw new EntityNotFoundException("Utilisateur introuvable");
         }
 
         userRepository.deleteById(id);
@@ -129,7 +111,7 @@ public class UserService implements IUserService {
         return userRepository.findByUsernameContainingIgnoreCase(username)
                 .stream()
                 .map(userMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // RECHERCHE PAR FIRSTNAME
@@ -139,7 +121,7 @@ public class UserService implements IUserService {
         return userRepository.findByFirstNameContainingIgnoreCase(firstname)
                 .stream()
                 .map(userMapper::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
 }

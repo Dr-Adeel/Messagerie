@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.eilco.messagerie.models.request.UserRequest;
 import com.eilco.messagerie.models.response.UserResponse;
-import com.eilco.messagerie.services.JWTService;
+import com.eilco.messagerie.services.implementations.JWTService;
 import com.eilco.messagerie.services.interfaces.IUserService;
 
 import jakarta.validation.Valid;
@@ -19,9 +19,9 @@ import lombok.RequiredArgsConstructor;
 @RestController
 public class SecurityController {
 
-    final private JWTService jwtService;
+    private final  JWTService jwtService;
 
-    final private  IUserService userService;
+    private final   IUserService userService;
 
 
 
