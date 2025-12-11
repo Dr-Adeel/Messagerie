@@ -2,21 +2,18 @@ package com.eilco.messagerie.services.interfaces;
 
 import com.eilco.messagerie.models.request.UserRequest;
 import com.eilco.messagerie.models.response.UserResponse;
+import com.eilco.messagerie.repositories.entities.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
+
 import java.util.List;
+import java.util.Optional;
 
-public interface IUserService {
-    UserResponse create(UserRequest request);
+public interface IUserService extends UserDetailsService {
+    UserResponse registerUser(UserRequest userRequest);
 
-    UserResponse getById(Long id);
+    Optional<User> findByUsername(String username);
 
-    List<UserResponse> getAll();
+    List<UserResponse> findAllUsers();
 
-    UserResponse update(Long id, UserRequest request);
-
-    void delete(Long id);
-
-    List<UserResponse> searchByUsername(String username);
-
-    List<UserResponse> searchByFirstName(String firstname);
 
 }

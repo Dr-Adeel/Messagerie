@@ -2,19 +2,13 @@ package com.eilco.messagerie.services.interfaces;
 
 import com.eilco.messagerie.models.request.GroupRequest;
 import com.eilco.messagerie.models.response.GroupResponse;
-import com.eilco.messagerie.repositories.entities.Group;
-import com.eilco.messagerie.repositories.entities.User;
 
 public interface IGroupService {
-    // Method to create a group
-    GroupResponse createGroup(GroupRequest groupRequest);
+    GroupResponse createGroup(GroupRequest groupRequest, String creatorUsername);
 
-    void addMember(Long groupId, Long userId, Long requesterId);
+    void addMember(Long groupId, String username);
 
-    void removeMember(Long groupId, Long userId, Long requesterId);
-    // Method to delete a group by its ID
-    void deleteGroup(Long groupId);
+    void removeMember(Long groupId, String username);
 
-    Group getById(Long id);
-    public boolean isAdminOfGroup(User user, Group group);
+    GroupResponse getUserGroup(String username);
 }

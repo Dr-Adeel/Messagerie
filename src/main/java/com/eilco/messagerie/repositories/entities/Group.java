@@ -1,16 +1,16 @@
 package com.eilco.messagerie.repositories.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
-import java.util.Set;
-import java.util.HashSet;
+import java.util.List;
 
 @Entity
 @Table(name = "app_group")
 @Data
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Group {
@@ -22,8 +22,10 @@ public class Group {
     @Column(unique = true, nullable = false)
     private String name;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "creator_user_id")
     private User creator;
 
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    private List<User> members;
 }

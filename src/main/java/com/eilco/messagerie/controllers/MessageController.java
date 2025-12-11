@@ -2,46 +2,52 @@ package com.eilco.messagerie.controllers;
 
 import com.eilco.messagerie.models.request.MessageRequest;
 import com.eilco.messagerie.models.response.MessageResponse;
-import com.eilco.messagerie.service.IDirectMessageService;
-import com.eilco.messagerie.service.IGroupMessageService;
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import com.eilco.messagerie.services.interfaces.IMessageService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
-@RequiredArgsConstructor
-@RequestMapping("/api/message")
 @RestController
+@RequestMapping("/api/messages")
 public class MessageController {
 
-    private final IGroupMessageService groupMessageService;
-    private final IDirectMessageService directMessageService;
+      private final IMessageService messageService;
 
-    @GetMapping("/direct/{userAId}/{userBId}")
-    public List<MessageResponse> getPrivateConversation(
-            @PathVariable Long userAId,
-            @PathVariable Long userBId){
+      public MessageController(IMessageService messageService) {
+            this.messageService = messageService;
+      }
 
-        return directMessageService.getPrivateConversation(userAId,userBId);
+      @PostMapping("/send-private")
+      public ResponseEntity<MessageResponse> sendPrivateMessage(@RequestBody MessageRequest request,
+                  Authentication authentication) {
+            MessageResponse message = messageService.sendPrivateMessage(request, authentication.getName());
+            return ResponseEntity.ok(message);
+      }
+
+      @PostMapping("/send-group")
+      public ResponseEntity<MessageResponse> sendGroupMessage(@RequestBody MessageRequest request,
+                  Authentication authentication) {
+            MessageResponse message = messageService.sendGroupMessage(request, authentication.getName());
+            return ResponseEntity.ok(message);
+      }
+
+      @GetMapping("/private/{username}")
+      public ResponseEntity<List<MessageResponse>> getPrivateConversation(@PathVariable String username,
+                  Authentication authentication) {
+            List<MessageResponse> messages = messageService.getPrivateConversation(authentication.getName(), username);
+            return ResponseEntity.ok(messages);
+      }
+
+      @GetMapping("/group/{groupId}")
+      public ResponseEntity<List<MessageResponse>> getGroupMessages(@PathVariable Long groupId) {
+            List<MessageResponse> messages = messageService.getGroupMessages(groupId);
+            return ResponseEntity.ok(messages);
+      }
+
+    @GetMapping("/unread-count")
+    public ResponseEntity<Long> getUnreadCount(Authentication authentication) {
+        return ResponseEntity.ok(messageService.getUnreadCount(authentication.getName()));
     }
-
-    @PostMapping("/direct")
-    public ResponseEntity<MessageResponse> sendDirectMessage(@Valid @RequestBody MessageRequest request) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(directMessageService.sendDirectMessage(request));
-    }
-
-    @GetMapping("/group/{userId}/{groupId}")
-    public List<MessageResponse> getGroupConversation(@PathVariable Long userId, @PathVariable Long groupId){
-        return groupMessageService.getGroupMessages(userId, groupId);
-    }
-
-    @PostMapping("/group")
-    public ResponseEntity<MessageResponse> sendGroupMessage(@Valid @RequestBody MessageRequest request) {
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(directMessageService.sendMessageGroup(request));
-    }
-
 }
