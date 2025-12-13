@@ -6,6 +6,7 @@ import com.eilco.messagerie.exceptions.UserNotMemberException;
 import com.eilco.messagerie.mappers.MessageMapper;
 import com.eilco.messagerie.models.request.MessageRequest;
 import com.eilco.messagerie.models.response.MessageResponse;
+import com.eilco.messagerie.models.response.NotificationResponse;
 import com.eilco.messagerie.repositories.GroupRepository;
 import com.eilco.messagerie.repositories.MessageRepository;
 import com.eilco.messagerie.repositories.MessageStatusRepository;
@@ -63,6 +64,16 @@ public class MessageServiceImpl implements IMessageService {
         // Push to WebSocket
         messagingTemplate.convertAndSendToUser(receiver.getUsername(), "/queue/messages", response);
 
+        // Send notification with unread count
+        long unreadCount = messageStatusRepository.countByReceiverIdAndIsReadFalse(receiver.getId());
+        NotificationResponse notification = NotificationResponse.builder()
+                        .type("MESSAGE")
+                        .content("New message from " + sender.getUsername())
+                        .count(unreadCount)
+                        .sender(sender.getUsername())
+                        .build();
+        messagingTemplate.convertAndSendToUser(receiver.getUsername(), "/queue/notifications", notification);
+
         return response;
     }
 
@@ -98,6 +109,18 @@ public class MessageServiceImpl implements IMessageService {
                         .isRead(false)
                         .build();
                     messageStatusRepository.save(status);
+
+                    // Send notification to each member
+                    long unreadCount = messageStatusRepository
+                                    .countByReceiverIdAndIsReadFalse(member.getId());
+                    NotificationResponse notification = NotificationResponse.builder()
+                                    .type("MESSAGE")
+                                    .content("New message in group " + group.getName())
+                                    .count(unreadCount)
+                                    .sender(sender.getUsername())
+                                    .build();
+                    messagingTemplate.convertAndSendToUser(member.getUsername(),
+                                    "/queue/notifications", notification);
                 });
         }
 

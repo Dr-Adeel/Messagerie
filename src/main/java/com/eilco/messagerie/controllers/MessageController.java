@@ -46,8 +46,14 @@ public class MessageController {
             return ResponseEntity.ok(messages);
       }
 
-    @GetMapping("/unread-count")
-    public ResponseEntity<Long> getUnreadCount(Authentication authentication) {
-        return ResponseEntity.ok(messageService.getUnreadCount(authentication.getName()));
-    }
+      @GetMapping("/unread-count")
+      public ResponseEntity<Long> getUnreadCount(Authentication authentication) {
+            return ResponseEntity.ok(messageService.getUnreadCount(authentication.getName()));
+      }
+
+      @PutMapping("/read/{messageId}")
+      public ResponseEntity<Void> markAsRead(@PathVariable Long messageId) {
+            messageService.markAsRead(messageId);
+            return ResponseEntity.ok().build();
+      }
 }
