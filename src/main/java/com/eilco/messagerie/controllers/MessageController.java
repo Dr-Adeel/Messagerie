@@ -1,5 +1,8 @@
 package com.eilco.messagerie.controllers;
 
+import com.eilco.messagerie.exceptions.GroupNotFoundException;
+import com.eilco.messagerie.exceptions.UserNotFoundException;
+import com.eilco.messagerie.exceptions.UserNotMemberException;
 import com.eilco.messagerie.models.request.MessageRequest;
 import com.eilco.messagerie.models.response.MessageResponse;
 import com.eilco.messagerie.services.interfaces.IMessageService;
@@ -17,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/message")
+@RequestMapping("/api/messages")
 @Tag(name = "Messaging", description = "Endpoints for sending and retrieving both direct and group messages.")
 public class MessageController {
 
@@ -33,10 +36,14 @@ public class MessageController {
               @ApiResponse(responseCode = "200", description = "Message sent successfully and returned",
                       content = @Content(schema = @Schema(implementation = MessageResponse.class)))
       })
-      public ResponseEntity<MessageResponse> sendPrivateMessage(@Valid @RequestBody MessageRequest request,
+      public ResponseEntity<MessageResponse> sendPrivateMessage(@RequestBody MessageRequest request,
                   Authentication authentication) {
-            MessageResponse message = messageService.sendPrivateMessage(request, authentication.getName());
-            return ResponseEntity.ok(message);
+          try{
+              MessageResponse message = messageService.sendPrivateMessage(request, authentication.getName());
+              return ResponseEntity.ok(message);
+          }catch (UserNotFoundException e){
+              return ResponseEntity.notFound().build();
+          }
       }
 
       @PostMapping("/send-group")
@@ -47,8 +54,14 @@ public class MessageController {
       })
       public ResponseEntity<MessageResponse> sendGroupMessage(@Valid @RequestBody MessageRequest request,
                   Authentication authentication) {
-            MessageResponse message = messageService.sendGroupMessage(request, authentication.getName());
-            return ResponseEntity.ok(message);
+          try{
+              MessageResponse message = messageService.sendGroupMessage(request, authentication.getName());
+              return ResponseEntity.ok(message);
+          }catch (UserNotFoundException | GroupNotFoundException e){
+              return ResponseEntity.notFound().build();
+          }catch (UserNotMemberException e){
+              return ResponseEntity.badRequest().build();
+          }
       }
 
       @GetMapping("/private/{username}")

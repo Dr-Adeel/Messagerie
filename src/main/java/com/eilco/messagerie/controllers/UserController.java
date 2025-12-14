@@ -20,7 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @Tag(name = "Users Management", description = "Endpoints for viewing, updating, deleting, and searching user profiles.")
 public class UserController {
 

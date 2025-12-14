@@ -1,5 +1,6 @@
 package com.eilco.messagerie.controllers;
 
+import com.eilco.messagerie.exceptions.UserNotFoundException;
 import com.eilco.messagerie.models.request.GroupRequest;
 import com.eilco.messagerie.models.response.GroupResponse;
 import com.eilco.messagerie.services.interfaces.IGroupService;
@@ -32,10 +33,14 @@ public class GroupController {
             @ApiResponse(responseCode = "200", description = "Group created successfully",
                     content = @Content(schema = @Schema(implementation = GroupResponse.class)))
     })
-    public ResponseEntity<GroupResponse> createGroup(@Valid @RequestBody GroupRequest groupRequest,
+    public ResponseEntity<GroupResponse> createGroup(@RequestBody GroupRequest groupRequest,
                                                      Authentication authentication) {
-        GroupResponse group = groupService.createGroup(groupRequest, authentication.getName());
-        return ResponseEntity.ok(group);
+        try {
+            GroupResponse group = groupService.createGroup(groupRequest, authentication.getName());
+            return ResponseEntity.ok(group);
+        }catch (UserNotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/{id}/add-member")
