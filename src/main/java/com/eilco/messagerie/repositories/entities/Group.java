@@ -2,8 +2,8 @@ package com.eilco.messagerie.repositories.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.List;
+
 
 @Entity
 @Table(name = "app_group")
@@ -26,6 +26,16 @@ public class Group {
     @JoinColumn(name = "creator_user_id")
     private User creator;
 
+
+
+    public enum NotificationType {
+        PRIVATE_MESSAGE,
+        GROUP_MESSAGE,
+        MENTION,
+        GROUP_INVITE
+    }
+
     @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
     private List<User> members;
+
 }

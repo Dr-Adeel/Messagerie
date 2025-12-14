@@ -6,6 +6,7 @@ import com.eilco.messagerie.models.request.MessageRequest;
 import com.eilco.messagerie.models.request.UserRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -35,7 +36,7 @@ public class MessagerieIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Test
-    public void testFullFlow() throws Exception {
+    public void testFullFlowWithNotifications() throws Exception {
         // --- 1. Register User A (Alice) ---
         UserRequest aliceReq = UserRequest.builder()
                 .username("alice_test")
@@ -44,10 +45,15 @@ public class MessagerieIntegrationTest {
                 .lastName("Test")
                 .build();
 
-        mockMvc.perform(post("/api/auth/register")
+        MvcResult aliceResult = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(aliceReq)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // RÉCUPÈRE L'ID D'ALICE
+        JsonNode aliceNode = objectMapper.readTree(aliceResult.getResponse().getContentAsString());
+        Long aliceId = aliceNode.get("id").asLong();
 
         // --- 2. Register User B (Bob) ---
         UserRequest bobReq = UserRequest.builder()
@@ -102,15 +108,19 @@ public class MessagerieIntegrationTest {
         msgReq.setReceiverUserId(bobId);
         msgReq.setContent("Hello Bob!");
 
-        mockMvc.perform(post("/api/messages/send-private")
+        MvcResult messageResult = mockMvc.perform(post("/api/messages/send-private")
                         .header(HttpHeaders.AUTHORIZATION, tokenAlice)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(msgReq)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value("Hello Bob!"));
+                .andExpect(jsonPath("$.content").value("Hello Bob!"))
+                .andReturn();
 
-        // --- 7. Check Unread Count for Bob ---
-        // Login Bob First
+        // Récupérer le messageId depuis la réponse
+        JsonNode messageNode = objectMapper.readTree(messageResult.getResponse().getContentAsString());
+        Long messageId = messageNode.get("id").asLong();
+
+        // --- 7. Login Bob to check unread messages & notifications ---
         LoginRequest loginBob = new LoginRequest("bob_test", "password123");
         MvcResult loginResultBob = mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -120,23 +130,67 @@ public class MessagerieIntegrationTest {
         String tokenBob = "Bearer " + objectMapper.readTree(loginResultBob.getResponse().getContentAsString())
                 .get("token").asText();
 
+        // --- 8. Check Unread Count for Bob ---
         mockMvc.perform(get("/api/messages/unread-count")
                         .header(HttpHeaders.AUTHORIZATION, tokenBob))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").value(1));
+
+        // --- 9. Check Private Notification for Bob ---
+        MvcResult notifResult = mockMvc.perform(get("/api/notifications/unread")
+                        .header(HttpHeaders.AUTHORIZATION, tokenBob))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode notifNode = objectMapper.readTree(notifResult.getResponse().getContentAsString());
+        Assertions.assertEquals(1, notifNode.size());
+        Assertions.assertEquals("PRIVATE_MESSAGE", notifNode.get(0).get("type").asText());
+        Assertions.assertEquals(messageId, notifNode.get(0).get("messageId").asLong());
+        // ✅ UTILISE LES IDs RÉCUPÉRÉS DYNAMIQUEMENT
+        Assertions.assertEquals(aliceId, notifNode.get(0).get("senderId").asLong());
+        Assertions.assertEquals(bobId, notifNode.get(0).get("recipientId").asLong());
+
+        // --- 10. Send Group Message (Alice -> Test Group) ---
+        MessageRequest groupMsgReq = new MessageRequest();
+        groupMsgReq.setReceiverGroupId(groupId);
+        groupMsgReq.setContent("Hello Group!");
+
+        mockMvc.perform(post("/api/messages/send-group")
+                        .header(HttpHeaders.AUTHORIZATION, tokenAlice)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(groupMsgReq)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").value("Hello Group!"));
+
+        // --- 11. Check Group Notification for Bob ---
+        MvcResult groupNotifResult = mockMvc.perform(get("/api/notifications/unread")
+                        .header(HttpHeaders.AUTHORIZATION, tokenBob))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode groupNotifNode = objectMapper.readTree(groupNotifResult.getResponse().getContentAsString());
+        Assertions.assertEquals(2, groupNotifNode.size()); // Bob should now have 2 unread notifications
+        boolean foundGroupNotif = false;
+        for (JsonNode n : groupNotifNode) {
+            if (n.get("type").asText().equals("GROUP_MESSAGE") &&
+                    n.get("groupId").asLong() == groupId) {
+                foundGroupNotif = true;
+                break;
+            }
+        }
+        Assertions.assertTrue(foundGroupNotif, "Group notification should exist for Bob");
     }
 
     @Test
     public void testErrorScenarios() throws Exception {
-        // --- 1. Login with bad credentials (should generate
-        // BadCredentialsException/401) ---
+        // --- 1. Login with bad credentials (401) ---
         LoginRequest badLogin = new LoginRequest("non_existent_user", "wrong_password");
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(badLogin)))
-                .andExpect(status().isUnauthorized()); // Assuming 401 for bad auth
+                .andExpect(status().isUnauthorized());
 
-        // --- 2. Register valid user to have a token for other tests ---
+        // --- 2. Register user for other tests ---
         UserRequest userReq = UserRequest.builder()
                 .username("error_test_user")
                 .password("password123")
@@ -157,23 +211,21 @@ public class MessagerieIntegrationTest {
         String token = "Bearer " + objectMapper.readTree(loginRes.getResponse().getContentAsString())
                 .get("token").asText();
 
-        // --- 3. Send message to non-existent user (should generate
-        // UserNotFoundException/404) ---
+        // --- 3. Send message to non-existent user (404) ---
         MessageRequest msgReq = new MessageRequest();
-        msgReq.setReceiverUserId(99999L); // ID likely not to exist
+        msgReq.setReceiverUserId(99999L);
         msgReq.setContent("Ghost message");
 
         mockMvc.perform(post("/api/messages/send-private")
                         .header(HttpHeaders.AUTHORIZATION, token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(msgReq)))
-                .andExpect(status().isNotFound()); // Assuming 404 is mapped to UserNotFoundException
+                .andExpect(status().isNotFound());
 
-        // --- 4. Add Member to non-existent group (should generate
-        // GroupNotFoundException/404) ---
+        // --- 4. Add Member to non-existent group (404) ---
         mockMvc.perform(post("/api/groups/99999/add-member")
                         .param("username", "error_test_user")
                         .header(HttpHeaders.AUTHORIZATION, token))
-                .andExpect(status().isNotFound()); // Assuming 404 is mapped to GroupNotFoundException
+                .andExpect(status().isNotFound());
     }
 }

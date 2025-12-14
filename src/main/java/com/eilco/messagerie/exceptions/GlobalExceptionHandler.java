@@ -46,4 +46,19 @@ public class GlobalExceptionHandler {
             response.put("error", ex.getMessage());
             return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
       }
+
+      @ExceptionHandler(NotificationNotFoundException.class)
+      public ResponseEntity<Map<String, String>> handleNotificationNotFoundException(NotificationNotFoundException ex) {
+      Map<String, String> response = new HashMap<>();
+      response.put("error", ex.getMessage());
+      return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+      }
+
+      @ExceptionHandler(InvalidNotificationRequestException.class)
+      public ResponseEntity<Map<String, String>> handleInvalidNotificationRequestException(InvalidNotificationRequestException ex) {
+      Map<String, String> response = new HashMap<>();
+      response.put("error", ex.getMessage());
+      return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+      }
+
 }
