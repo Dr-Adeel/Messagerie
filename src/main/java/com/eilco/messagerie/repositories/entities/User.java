@@ -1,14 +1,16 @@
 package com.eilco.messagerie.repositories.entities;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
-import java.util.Objects;
+import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "app_user")
 @Data
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -21,17 +23,18 @@ public class User {
     private String username;
 
     @Column(nullable = false)
-    private String password; // Doit être le mot de passe HACHÉ (utilisez Spring Security)
+    private String password;
 
     private String firstName;
     private String lastName;
 
-    // Relation ManyToOne: Un utilisateur appartient à UN SEUL groupe.
-    // Cette colonne 'group_id' sera créée dans la table 'app_user'.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     private Group group;
 
+    @OneToMany(mappedBy = "sender")
+    private List<Message> sentMessages;
+
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
 }
-
-

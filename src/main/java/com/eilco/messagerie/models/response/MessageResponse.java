@@ -1,11 +1,12 @@
 package com.eilco.messagerie.models.response;
 
+
 import com.eilco.messagerie.repositories.entities.Group;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
 
