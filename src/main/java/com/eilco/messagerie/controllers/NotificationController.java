@@ -25,6 +25,13 @@ public class NotificationController {
 
     private final NotificationService notificationService;
 
+
+    @GetMapping("/ping")
+    public String ping() {
+        return "pong";
+    }
+
+
     /**
      * POST /api/notifications : Create a new notification
      * This endpoint accepts a NotificationRequest and creates a new notification
