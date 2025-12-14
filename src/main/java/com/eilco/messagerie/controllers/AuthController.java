@@ -6,6 +6,12 @@ import com.eilco.messagerie.models.response.JwtResponse;
 import com.eilco.messagerie.models.response.UserResponse;
 import com.eilco.messagerie.security.jwt.JwtUtils;
 import com.eilco.messagerie.services.interfaces.IUserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name="Authentication", description = "Endpoints to create a new user (Regester) and to authenticate (login) by valid username and password")
 public class AuthController {
 
     private final IUserService userService;
@@ -32,13 +39,18 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> registerUser(@RequestBody UserRequest userRequest) {
+    @Operation(summary = "Register new user", description = "create a new user by filling the registration information")
+    @ApiResponse(responseCode = "200", description = "New user created successfully",
+            content = @Content(schema = @Schema(implementation = UserResponse.class)))
+    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody UserRequest userRequest) {
         UserResponse registeredUser = userService.registerUser(userRequest);
         return ResponseEntity.ok(registeredUser);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> loginUser(@RequestBody LoginRequest loginRequest) {
+    @Operation(summary = "Connect to your personal account", description = "Login by providing valid username and password")
+    @ApiResponse(responseCode = "200", description = "User login successfully")
+    public ResponseEntity<JwtResponse> loginUser(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password()));
 

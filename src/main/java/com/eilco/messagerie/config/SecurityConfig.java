@@ -53,7 +53,7 @@ public class SecurityConfig {
                         .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .authorizeHttpRequests(auth -> auth
-                                    .requestMatchers("/api/auth/**", "/h2-console/**", "/ws/**", "/ws-raw/**")
+                                    .requestMatchers("/api/auth/**", "/h2-console/**", "/ws/**", "/ws-raw/**","/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
                                     .permitAll()
                                     .anyRequest().authenticated());
 

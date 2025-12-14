@@ -13,8 +13,12 @@ import com.eilco.messagerie.repositories.GroupRepository;
 import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.services.interfaces.IGroupService;
 import lombok.AllArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -22,6 +26,12 @@ public class GroupServiceImpl implements IGroupService {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
     private final GroupMapper groupMapper;
+
+    @Override
+    public Group getById(Long id) {
+        return groupRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Group not found with ID: " + id));
+    }
 
     @Override
     @Transactional
@@ -85,5 +95,28 @@ public class GroupServiceImpl implements IGroupService {
         }
 
         return groupMapper.toResponse(user.getGroup());
+    }
+
+    @Override
+    public void deleteGroup(Long groupId) {
+        Group group = getById(groupId);
+         String username = SecurityContextHolder.getContext().getAuthentication().getName();
+         if (!group.getCreator().getUsername().equals(username)) return;
+        List<User> usersInGroup = userRepository.findAllByGroup(group);
+        for (User user : usersInGroup) {
+            user.setGroup(null);
+        }
+        userRepository.saveAll(usersInGroup); // Update all users in DB
+
+        // Delete the group
+        groupRepository.delete(group);
+    }
+
+    @Override
+    public boolean isAdminOfGroup(User user, Group group) {
+        if (user == null || group == null || group.getCreator() == null) {
+            return false;
+        }
+        return group.getCreator().getId().equals(user.getId());
     }
 }

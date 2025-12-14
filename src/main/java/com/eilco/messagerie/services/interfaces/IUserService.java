@@ -13,7 +13,20 @@ public interface IUserService extends UserDetailsService {
 
     Optional<User> findByUsername(String username);
 
+    List<UserResponse> findByUserName(String username);
+
+    List<UserResponse> findByFirstName(String firstname);
+
     List<UserResponse> findAllUsers();
+
+    UserResponse getById(Long id);
+
+    UserResponse update(Long id, UserRequest request);
+
+    void delete(Long id);
+
+    User getCurrentUser();
+
 
 
 }
