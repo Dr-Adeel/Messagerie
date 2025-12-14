@@ -45,10 +45,15 @@ public class MessagerieIntegrationTest {
                 .lastName("Test")
                 .build();
 
-        mockMvc.perform(post("/api/auth/register")
+        MvcResult aliceResult = mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(aliceReq)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andReturn();
+
+        // RÉCUPÈRE L'ID D'ALICE
+        JsonNode aliceNode = objectMapper.readTree(aliceResult.getResponse().getContentAsString());
+        Long aliceId = aliceNode.get("id").asLong();
 
         // --- 2. Register User B (Bob) ---
         UserRequest bobReq = UserRequest.builder()
@@ -140,10 +145,10 @@ public class MessagerieIntegrationTest {
         JsonNode notifNode = objectMapper.readTree(notifResult.getResponse().getContentAsString());
         Assertions.assertEquals(1, notifNode.size());
         Assertions.assertEquals("PRIVATE_MESSAGE", notifNode.get(0).get("type").asText());
-        // ✅ CORRECTION : messageId est un nombre (Long), pas le contenu du message
         Assertions.assertEquals(messageId, notifNode.get(0).get("messageId").asLong());
-        Assertions.assertEquals(1L, notifNode.get(0).get("senderId").asLong());
-        Assertions.assertEquals(2L, notifNode.get(0).get("recipientId").asLong());
+        // ✅ UTILISE LES IDs RÉCUPÉRÉS DYNAMIQUEMENT
+        Assertions.assertEquals(aliceId, notifNode.get(0).get("senderId").asLong());
+        Assertions.assertEquals(bobId, notifNode.get(0).get("recipientId").asLong());
 
         // --- 10. Send Group Message (Alice -> Test Group) ---
         MessageRequest groupMsgReq = new MessageRequest();
