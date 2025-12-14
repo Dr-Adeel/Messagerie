@@ -6,6 +6,7 @@ import com.eilco.messagerie.exceptions.UserNotMemberException;
 import com.eilco.messagerie.mappers.MessageMapper;
 import com.eilco.messagerie.models.request.MessageRequest;
 import com.eilco.messagerie.models.response.MessageResponse;
+import com.eilco.messagerie.models.response.NotificationResponse;
 import com.eilco.messagerie.repositories.GroupRepository;
 import com.eilco.messagerie.repositories.MessageRepository;
 import com.eilco.messagerie.repositories.MessageStatusRepository;
@@ -13,6 +14,7 @@ import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.Message;
 import com.eilco.messagerie.repositories.entities.MessageStatus;
+import com.eilco.messagerie.repositories.entities.NotificationType;
 import com.eilco.messagerie.repositories.entities.User;
 import com.eilco.messagerie.services.interfaces.IMessageService;
 import lombok.AllArgsConstructor;
@@ -63,6 +65,17 @@ public class MessageServiceImpl implements IMessageService {
         // Push to WebSocket
         messagingTemplate.convertAndSendToUser(receiver.getUsername(), "/queue/messages", response);
 
+        // Send notification with unread count
+        NotificationResponse notification = NotificationResponse.builder()
+            .messageId(savedMessage.getId())
+            .type(NotificationType.PRIVATE_MESSAGE)
+            .senderId(sender.getId())
+            .recipientId(receiver.getId())
+            .sentAt(savedMessage.getTimestamp())
+            .status(false)
+            .build();
+        messagingTemplate.convertAndSendToUser(receiver.getUsername(), "/queue/notifications", notification);
+
         return response;
     }
 
@@ -98,6 +111,19 @@ public class MessageServiceImpl implements IMessageService {
                         .isRead(false)
                         .build();
                     messageStatusRepository.save(status);
+
+                    // Send notification to each member
+                    NotificationResponse notification = NotificationResponse.builder()
+                        .messageId(savedMessage.getId())
+                        .type(NotificationType.GROUP_MESSAGE)
+                        .senderId(sender.getId())
+                        .recipientId(member.getId())
+                        .groupId(group.getId())
+                        .sentAt(savedMessage.getTimestamp())
+                        .status(false)
+                        .build();
+                    messagingTemplate.convertAndSendToUser(member.getUsername(),
+                                    "/queue/notifications", notification);
                 });
         }
 
