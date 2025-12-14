@@ -14,6 +14,7 @@ import com.eilco.messagerie.repositories.UserRepository;
 import com.eilco.messagerie.repositories.entities.Group;
 import com.eilco.messagerie.repositories.entities.Message;
 import com.eilco.messagerie.repositories.entities.MessageStatus;
+import com.eilco.messagerie.repositories.entities.NotificationType;
 import com.eilco.messagerie.repositories.entities.User;
 import com.eilco.messagerie.services.interfaces.IMessageService;
 import lombok.AllArgsConstructor;
@@ -65,13 +66,14 @@ public class MessageServiceImpl implements IMessageService {
         messagingTemplate.convertAndSendToUser(receiver.getUsername(), "/queue/messages", response);
 
         // Send notification with unread count
-        long unreadCount = messageStatusRepository.countByReceiverIdAndIsReadFalse(receiver.getId());
         NotificationResponse notification = NotificationResponse.builder()
-                        .type("MESSAGE")
-                        .content("New message from " + sender.getUsername())
-                        .count(unreadCount)
-                        .sender(sender.getUsername())
-                        .build();
+            .messageId(savedMessage.getId())
+            .type(NotificationType.PRIVATE_MESSAGE)
+            .senderId(sender.getId())
+            .recipientId(receiver.getId())
+            .sentAt(savedMessage.getTimestamp())
+            .status(false)
+            .build();
         messagingTemplate.convertAndSendToUser(receiver.getUsername(), "/queue/notifications", notification);
 
         return response;
@@ -111,14 +113,15 @@ public class MessageServiceImpl implements IMessageService {
                     messageStatusRepository.save(status);
 
                     // Send notification to each member
-                    long unreadCount = messageStatusRepository
-                                    .countByReceiverIdAndIsReadFalse(member.getId());
                     NotificationResponse notification = NotificationResponse.builder()
-                                    .type("MESSAGE")
-                                    .content("New message in group " + group.getName())
-                                    .count(unreadCount)
-                                    .sender(sender.getUsername())
-                                    .build();
+                        .messageId(savedMessage.getId())
+                        .type(NotificationType.GROUP_MESSAGE)
+                        .senderId(sender.getId())
+                        .recipientId(member.getId())
+                        .groupId(group.getId())
+                        .sentAt(savedMessage.getTimestamp())
+                        .status(false)
+                        .build();
                     messagingTemplate.convertAndSendToUser(member.getUsername(),
                                     "/queue/notifications", notification);
                 });
